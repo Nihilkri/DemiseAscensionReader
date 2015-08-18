@@ -30,7 +30,7 @@ namespace DemiseAscensionReader {
 		private void Form1_Load(object sender, EventArgs e) {
 			gi = new Bitmap(fx, fy); gb = Graphics.FromImage(gi); gf = CreateGraphics();
 
-
+			gb.DrawString("Press O to open a file\nPress D to De/Encrypt a file\n\nIn dungeon mode:\nHome/End to level 1/45\nPage Up/Down to change levels", Font, Brushes.Black, 0, 0);
 		}
 
 		private void Form1_Paint(object sender, PaintEventArgs e) {
@@ -47,10 +47,10 @@ namespace DemiseAscensionReader {
 				case Keys.O: Open(); break;
 				case Keys.D: Open(false); break;
 
-				case Keys.Home: if(mode == "Dungeon") DrawMap(0); break;
-				case Keys.PageUp: if(mode == "Dungeon") { if(lv == 0) lv = 45; DrawMap(--lv); } break;
-				case Keys.PageDown: if(mode == "Dungeon") { if(lv == 44) lv = -1; DrawMap(++lv); } break;
-				case Keys.End: if(mode == "Dungeon") DrawMap(44); break;
+				case Keys.Home: if(mode == "DEMISEDungeon") DrawMap(0); break;
+				case Keys.PageUp: if(mode == "DEMISEDungeon") { if(lv == 0) lv = 45; DrawMap(--lv); } break;
+				case Keys.PageDown: if(mode == "DEMISEDungeon") { if(lv == 44) lv = -1; DrawMap(++lv); } break;
+				case Keys.End: if(mode == "DEMISEDungeon") DrawMap(44); break;
 
 
 			}
@@ -60,7 +60,7 @@ namespace DemiseAscensionReader {
 		private void Form1_MouseClick(object sender, MouseEventArgs e) {
 			int x=0, y=0; if(nomouse) return;
 			switch(mode) {
-				case "Dungeon":
+				case "DEMISEDungeon":
 					x = e.X - 990; y = (e.Y - 34) / 21;
 					if(x < 0 || y < 0 || x > 34 || y > 44) return;
 					DrawMap(y);
@@ -72,7 +72,7 @@ namespace DemiseAscensionReader {
 		private void Form1_MouseMove(object sender, MouseEventArgs e) {
 			int x=0, y=0; if(nomouse) return;
 			switch(mode) {
-				case "Dungeon":
+				case "DEMISEDungeon":
 					x = e.X / 11; y = 89-(e.Y-34)/11; 
 					if(x < 0 || y < 0 || x > 89 || y > 89) return;
 					csq = map.lvs[lv].sq[x, y]; cgp = map.gps[csq.g];
@@ -101,19 +101,19 @@ namespace DemiseAscensionReader {
 				case System.Windows.Forms.DialogResult.OK:
 					if(fyl != "") CloseFyl();
 					fyl = ofd.FileName;	io = new System.IO.FileStream(fyl,System.IO.FileMode.Open,System.IO.FileAccess.ReadWrite);
-					dat = new byte[io.Length]; io.Read(dat, 0, (int)io.Length); if(c) Crypt(); else CloseFyl(false);
+					dat = new byte[io.Length]; io.Read(dat, 0, (int)io.Length);
+					if(c) Crypt(); else { MessageBox.Show("You 'crypted " + fyl + "!"); CloseFyl(false);}
 					if(c) MessageBox.Show("You opened " + fyl + "!");
 					break;
 				case System.Windows.Forms.DialogResult.Cancel:	
 					MessageBox.Show("You hit cancel! " + fyl + " remains open!"); break;
 			}
-			if(!c) { MessageBox.Show("You 'crypted " + fyl + "!"); }
 			ofd.Dispose(); if(fyl == "") return;
 
 			// Datafile selector
-			mode = fyl.Substring(InsD.Length+6, fyl.Length - InsD.Length - 10);
+			mode = fyl.Substring(fyl.LastIndexOf('\\') + 1, fyl.Length - fyl.LastIndexOf('\\') - 5);
 			switch(mode) {
-				case "Dungeon": MessageBox.Show("Loading the map!"); LoadMap(); break;
+				case "DEMISEDungeon": MessageBox.Show("Loading the map!"); LoadMap(); break;
 				default: MessageBox.Show(mode); break;
 			}
 		}
