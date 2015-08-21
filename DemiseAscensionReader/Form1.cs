@@ -80,7 +80,7 @@ namespace DemiseAscensionReader {
 
 					gf.DrawString("XYZ: (" + (x+1) + "," + (y+1) + "," + (lv+1) + "); TE: " + csq.te + "; TW: " + csq.tw + "; TN: " + csq.tn + "; TS: " + csq.ts + 
 						"; TF: " + csq.tf + "; TC: " + csq.tc + "; M: " + csq.m + "; G: " + csq.g + "; R: " + csq.r, Font, Brushes.White, 0, 0);
-					gf.DrawString("Types: " + cgp.type + "; GID: " + cgp.id + "; LF: " + cgp.lf + "; LM: " + cgp.lm + "; GF: " + cgp.gf + 
+					gf.DrawString("Types: " + cgp.type.ToString("X8") + "; GID: " + cgp.id + "; LF: " + cgp.lf + "; LM: " + cgp.lm + "; GF: " + cgp.gf + 
 						"; SM: " + cgp.sm + "; MV: " + cgp.mv + "; T: " + cgp.t + "; R: " + cgp.r + "; S: " + cgp.s + "; SQ: " + cgp.sq
 
 
@@ -226,7 +226,11 @@ namespace DemiseAscensionReader {
 					if(y < 89 && (csq.g != map.lvs[lv].sq[x, y + 1].g)) gb.DrawLine(Pens.Violet, x1, y1, x2, y1);
 					if(y > 0 && (csq.g != map.lvs[lv].sq[x, y - 1].g)) gb.DrawLine(Pens.Violet, x1, y2, x2, y2);
 
-					if((cgp.type & 32768) != 0) gb.FillRectangle(Brushes.Blue, x1 + 4, y1 + 4, 3, 3);
+					if(cgp.type != 0) {
+						if((cgp.type & 0x8000) != 0) gb.FillRectangle(Brushes.Blue, x1 + 4, y1 + 4, 3, 3);
+						if((cgp.type & 0x0040) != 0) gb.FillRectangle(Brushes.Red, x1 + 4, y1 + 4, 3, 3);
+						if((cgp.type | 0x8040) == 0x8040) gb.FillRectangle(Brushes.Green, x1 + 4, y1 + 4, 3, 3);
+					}
 
 					// Wals exist
 					if(csq.te > 0) gb.DrawLine(Pens.Blue, x2, y1, x2, y2); if(csq.te > em) em = csq.te;
