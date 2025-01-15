@@ -8,7 +8,7 @@ namespace DemiseAscensionReader {
 	class Dungeon {
 		public short xm, ym, zm; public int gm; public int[] offset = new int[45];
 		public struct sqr {
-			public short te, tw, tn, ts, tf, tc, m, g; public bool r;
+			public short te, tw, tn, ts, tf, tc, m, g; public byte r;
 		}
 		public struct lev {
 			public byte[] uk, uk2;

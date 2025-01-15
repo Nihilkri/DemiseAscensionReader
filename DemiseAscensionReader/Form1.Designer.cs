@@ -29,8 +29,8 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(1024, 1024);
-			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+			this.ClientSize = new System.Drawing.Size(1536, 1024);
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.Location = new System.Drawing.Point(256, 0);
 			this.Name = "Form1";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
