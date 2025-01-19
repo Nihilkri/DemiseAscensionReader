@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -15,13 +16,18 @@ namespace DemiseAscensionReader {
 		Graphics gf, gb; Bitmap gi;
 		int fx = 1536, fy = 1024, fx2 = 768, fy2 = 512;
 		bool nomouse = true;
+		Brush[] br = new Brush[] {
+			Brushes.Black, Brushes.Blue, Brushes.Green, Brushes.Teal,
+			Brushes.Red, Brushes.Purple, Brushes.Brown, Brushes.DarkGray,
+			Brushes.White, Brushes.SkyBlue, Brushes.LimeGreen, Brushes.Cyan,
+			Brushes.Pink, Brushes.Magenta, Brushes.Yellow, Brushes.White};
 
 
-	#endregion Graphics
-	#region Files
+		#endregion Graphics
+		#region Files
 		string fyl = "", mode = ""; byte[] dat; int pos = 0;
 		System.IO.FileStream io; bool changed = false;
-		Dungeon map; int lv; Dungeon.sqr csq; Dungeon.grp cgp;
+		Dungeon map; int lv; Dungeon.Sqr csq; Dungeon.Grp cgp;
 	#endregion Files
 
 #endregion Variables
@@ -30,7 +36,14 @@ namespace DemiseAscensionReader {
 		private void Form1_Load(object sender, EventArgs e) {
 			gi = new Bitmap(fx, fy); gb = Graphics.FromImage(gi); gf = CreateGraphics();
 
-			gb.DrawString("Press O to open a file\nPress D to De/Encrypt a file\n\nIn dungeon mode:\nHome/End to level 1/45\nPage Up/Down to change levels", Font, Brushes.Black, 0, 0);
+			gb.Clear(Color.Black);
+			gb.DrawString(
+				"Press O to open a file\n" + 
+				"Press D to De/Encrypt a file\n\n" +
+				"In dungeon mode:\n" +
+				"Home/End to level 1/45\n" +
+				"Page Up/Down to change levels",
+				Font, Brushes.White, 0, 0);
 		}
 
 		private void Form1_Paint(object sender, PaintEventArgs e) {
@@ -46,11 +59,31 @@ namespace DemiseAscensionReader {
 				case Keys.Escape: CloseFyl(); Close(); break;
 				case Keys.O: Open(); break;
 				case Keys.D: Open(false); break;
-
-				case Keys.Home: if(mode == "DEMISEDungeon") DrawMap(0); break;
-				case Keys.PageUp: if(mode == "DEMISEDungeon") { if(lv == 0) lv = 45; DrawMap(--lv); } break;
-				case Keys.PageDown: if(mode == "DEMISEDungeon") { if(lv == 44) lv = -1; DrawMap(++lv); } break;
-				case Keys.End: if(mode == "DEMISEDungeon") DrawMap(44); break;
+				default:
+					switch(mode) {
+						case "": break;
+						case "DEMISEDungeon":
+							switch(e.KeyCode) {
+								case Keys.Home: DrawMap(0); break;
+								case Keys.End: DrawMap(44); break;
+								case Keys.PageUp: if(lv == 0) lv = 45; DrawMap(--lv); break;
+								case Keys.PageDown: if(lv == 44) lv = -1; DrawMap(++lv); break;
+							} break;
+						//case "DEMISEMonsters":
+						//	break;
+						default: // Unknown Mode
+							switch(e.KeyCode) {
+								case Keys.Home: ShowHex(0); break;
+								case Keys.End: ShowHex(-1); break;
+								case Keys.PageUp: ShowHex(lv - 0x1400); break;
+								case Keys.PageDown: ShowHex(lv + 0x1400); break;
+								case Keys.Up: ShowHex(lv - 0x40); break;
+								case Keys.Down: ShowHex(lv + 0x40); break;
+								case Keys.Left: ShowHex(lv - 0x1); break;
+								case Keys.Right: ShowHex(lv + 0x1); break;
+							}
+							break;
+					} break;
 
 
 			}
@@ -76,7 +109,7 @@ namespace DemiseAscensionReader {
 					x = e.X / 11; y = 89-(e.Y-34)/11; 
 					if(x < 0 || y < 0 || x > 89 || y > 89) return;
 					csq = map.lvs[lv].sq[x, y]; cgp = map.gps[csq.g];
-					gf.FillRectangle(Brushes.Black, 0, 0, 500, 20);
+					gf.FillRectangle(Brushes.Black, 0, 0, 900, 20);
 
 					gf.DrawString("XYZ: (" + (x+1) + "," + (y+1) + "," + (lv+1) + "); TE: " + csq.te + "; TW: " + csq.tw + "; TN: " + csq.tn + "; TS: " + csq.ts + 
 						"; TF: " + csq.tf + "; TC: " + csq.tc + "; M: " + csq.m + "; G: " + csq.g + "; R: " + csq.r, Font, Brushes.White, 0, 0);
@@ -123,7 +156,7 @@ namespace DemiseAscensionReader {
 			mode = fyl.Substring(fyl.LastIndexOf('\\') + 1, fyl.Length - fyl.LastIndexOf('\\') - 5);
 			switch(mode) {
 				case "DEMISEDungeon": MessageBox.Show("Loading the map!"); LoadMap(); break;
-				default: MessageBox.Show(mode); break;
+				default: MessageBox.Show(mode); ShowHex(0); break;
 			}
 		}
 		public void CloseFyl(bool c = true) {
@@ -183,7 +216,7 @@ namespace DemiseAscensionReader {
 				for (int i = 0; i < map.lvs[q].uk2.Length; i++)
 					if (map.lvs[q].uk2[i] != 0)
 						MessageBox.Show("map.lvs[" + q + "].uk2[" + i + "] is " + map.lvs[q].uk2[i]);
-				map.lvs[q].sq = new Dungeon.sqr[map.lvs[q].sqx, map.lvs[q].sqy];
+				map.lvs[q].sq = new Dungeon.Sqr[map.lvs[q].sqx, map.lvs[q].sqy];
 				for(int y = 0 ; y < map.lvs[q].sqy ; y++) {
 				  for(int x = 0 ; x < map.lvs[q].sqx ; x++) {
 						map.lvs[q].sq[x, y].te = ReadShort();
@@ -198,7 +231,7 @@ namespace DemiseAscensionReader {
 					}
 				}
 			}
-			map.gps = new Dungeon.grp[map.gm];
+			map.gps = new Dungeon.Grp[map.gm];
 			for(int q = 0 ; q < map.gm ; q++) {
 				map.gps[q].type = ReadInt();
 				map.gps[q].id = ReadShort();
@@ -227,9 +260,6 @@ namespace DemiseAscensionReader {
 			lv = nv;
 			gb.Clear(Color.Gray); int x1, y1, x2, y2;
 			int em=0, wm=0, nm=0, sm=0, cm=0, fm=0;
-			Brush[] br = new Brush[] {
-				Brushes.Blue, Brushes.Green, Brushes.Cyan, Brushes.Red, Brushes.Purple, Brushes.Yellow, Brushes.DarkGray, Brushes.White,
-				Brushes.SkyBlue, Brushes.LimeGreen, Brushes.Pink };
 			for(int x = 0 ; x < map.lvs[lv].sqx ; x++) {
 				for(int y = 0 ; y < map.lvs[lv].sqy ; y++) {
 					x1 = x * 11; x2 = x1 + 10; y1 = 34 + ((89 - y) * 11); y2 = y1 + 10; csq = map.lvs[lv].sq[x, y]; cgp = map.gps[csq.g];
@@ -308,7 +338,7 @@ namespace DemiseAscensionReader {
 				}
 			}
 			//MessageBox.Show(em + ", " + wm + ", " + nm + ", " + sm);
-			gb.DrawString(em + ", " + wm + ", " + nm + ", " + sm, Font, Brushes.Black, 650, 0);
+			gb.DrawString(em + ", " + wm + ", " + nm + ", " + sm, Font, Brushes.Black, 990, 0);
 			//gb.DrawString("uk: " + HexStr(map.lvs[lv].uk) + "    uk2: " + HexStr(map.lvs[lv].uk2),
 			gb.DrawString(
 				"sqx: " + map.lvs[lv].sqx +
@@ -324,10 +354,38 @@ namespace DemiseAscensionReader {
 			gb.DrawLine(Pens.Black, 1024, 34, 1024, 1024);
 
 
-				gf.DrawImage(gi, 0, 0);
+			gf.DrawImage(gi, 0, 0);
 		}
 
-#endregion Dungeon
+		#endregion Dungeon
+
+		#region Unknown
+		public void ShowHex(int nv) {
+			lv = nv; // if(lv < 0) lv = 0;
+			if(lv < 0 || lv > dat.Length) lv = (int)(dat.Length / 1280);
+			gb.Clear(Color.Gray);
+			String str = "";
+			byte v = 0;
+			Char[] uni = new Char[64];
+			byte[] bytes = new byte[64];
+			for (int y = 0; y < 80; y++) {
+				if(dat.Length < lv + y * 64) break;
+				str += String.Format("{0:X2} {1:X8} ", y, lv + y * 64);
+				for(int x = 0; x < 64; x++) {
+					if(dat.Length <= lv + y * 64 + x) {
+						v = bytes[x] = (byte)0; uni[x] = ' ';
+					} else {
+						v = bytes[x] = dat[lv + y * 64 + x];
+						if(v >= 0x20 && v <= 0xFF && v != 0x84) uni[x] = (char)v; else uni[x] = '.';
+					}
+				}
+				str += HexStr(bytes) + " " + new string(uni) + "\n";
+			}
+			gb.DrawString(str, Font, Brushes.Black, 0, 0);
+
+			gf.DrawImage(gi, 0, 0);
+		}
+		#endregion Unknown
 
 	}
 }
