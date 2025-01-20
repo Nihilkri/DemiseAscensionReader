@@ -154,6 +154,7 @@ namespace DemiseAscensionReader {
 
 			// Datafile selector
 			mode = fyl.Substring(fyl.LastIndexOf('\\') + 1, fyl.Length - fyl.LastIndexOf('\\') - 5);
+			mode += "Test";
 			switch(mode) {
 				case "DEMISEDungeon": MessageBox.Show("Loading the map!"); LoadMap(); break;
 				default: MessageBox.Show(mode); ShowHex(0); break;
@@ -197,15 +198,18 @@ namespace DemiseAscensionReader {
 		#endregion IO
 		#region Dungeon
 		public void LoadMap() {
-			ByteConverter bc = new ByteConverter(); pos = 20;
+			ByteConverter bc = new ByteConverter(); pos = 18;
 			map = new Dungeon();
+			map.zm = ReadShort(); // Max z coordinate of level, always 45
 			map.xm = ReadShort(); // Max x coordinate of level, always 90
 			map.ym = ReadShort(); // Max y coordinate of level, always 90
 			map.gm = ReadInt(); // Max encounter groups of dungeon, always 9172
 			MessageBox.Show("map.gm = " + map.gm);
-			for (int q = 0 ; q < 45 ; q++)
+			map.lvs = new Dungeon.Lev[map.zm];
+			map.offset = new int[map.zm];
+			for (int q = 0 ; q < map.zm; q++)
 				map.offset[q] = ReadInt() + 11;
-			for(int q = 0 ; q < 45 ; q++) {
+			for(int q = 0 ; q < map.zm; q++) {
 				if(pos != map.offset[q]) MessageBox.Show(q + ": " + pos + ", " + map.offset[q]);
 				map.lvs[q].uk = ReadBytes(8); // Unknown1, always 0s
 				map.lvs[q].sqx = ReadShort(); // The width of the level, always 90
@@ -358,12 +362,19 @@ namespace DemiseAscensionReader {
 		}
 
 		#endregion Dungeon
+		#region Monsters
+		public void LoadMonsters() {
 
+		}
+		public void ShowMonsters() {
+
+		}
+		#endregion Monsters
 		#region Unknown
 		public void ShowHex(int nv) {
 			lv = nv; // if(lv < 0) lv = 0;
 			if(lv < 0 || lv > dat.Length) lv = (int)(dat.Length / 1280);
-			gb.Clear(Color.Gray);
+			gb.Clear(Color.Black);
 			String str = "";
 			byte v = 0;
 			Char[] uni = new Char[64];
@@ -381,7 +392,7 @@ namespace DemiseAscensionReader {
 				}
 				str += HexStr(bytes) + " " + new string(uni) + "\n";
 			}
-			gb.DrawString(str, Font, Brushes.Black, 0, 0);
+			gb.DrawString(str, Font, Brushes.White, 0, 0);
 
 			gf.DrawImage(gi, 0, 0);
 		}
