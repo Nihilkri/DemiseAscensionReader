@@ -14,7 +14,8 @@ namespace DemiseAscensionReader {
 #region Variables
 	#region Graphics
 		Graphics gf, gb; Bitmap gi;
-		int fx = 1536, fy = 1024, fx2 = 768, fy2 = 512;
+		//int fx = 1536, fy = 1024, fx2 = 768, fy2 = 512;
+		int fx = 1920, fy = 1080, fx2 = 960, fy2 = 540;
 		bool nomouse = true;
 		Brush[] br = new Brush[] {
 			Brushes.Black, Brushes.Blue, Brushes.Green, Brushes.Teal,
@@ -28,6 +29,7 @@ namespace DemiseAscensionReader {
 		string fyl = "", mode = ""; byte[] dat; int pos = 0;
 		System.IO.FileStream io; bool changed = false;
 		Dungeon map; int lv; Dungeon.Sqr csq; Dungeon.Grp cgp;
+		Monster[] mons; int page = 0; Monster cmon;
 	#endregion Files
 
 #endregion Variables
@@ -69,8 +71,18 @@ namespace DemiseAscensionReader {
 								case Keys.PageUp: if(lv == 0) lv = 45; DrawMap(--lv); break;
 								case Keys.PageDown: if(lv == 44) lv = -1; DrawMap(++lv); break;
 							} break;
-						//case "DEMISEMonsters":
-						//	break;
+						case "DEMISEMonsters":
+							switch(e.KeyCode) {
+								case Keys.Home: ShowMonsters(0, page); break;
+								case Keys.End: ShowMonsters(Monster.nummon-60, page); break;
+								case Keys.PageUp: ShowMonsters(lv-60, page); break;
+								case Keys.PageDown: ShowMonsters(lv+60, page); break;
+								case Keys.Up: ShowMonsters(--lv, page); break;
+								case Keys.Down: ShowMonsters(++lv, page); break;
+								case Keys.Left: ShowMonsters(lv, --page); break;
+								case Keys.Right: ShowMonsters(lv, ++page); break;
+							}
+							break;
 						default: // Unknown Mode
 							switch(e.KeyCode) {
 								case Keys.Home: ShowHex(0); break;
@@ -154,9 +166,10 @@ namespace DemiseAscensionReader {
 
 			// Datafile selector
 			mode = fyl.Substring(fyl.LastIndexOf('\\') + 1, fyl.Length - fyl.LastIndexOf('\\') - 5);
-			mode += "Test";
+			//mode += "Hex";
 			switch(mode) {
 				case "DEMISEDungeon": MessageBox.Show("Loading the map!"); LoadMap(); break;
+				case "DEMISEMonsters": MessageBox.Show("Loading the monsters!"); LoadMonsters(); break;
 				default: MessageBox.Show(mode); ShowHex(0); break;
 			}
 		}
@@ -188,6 +201,18 @@ namespace DemiseAscensionReader {
 		public int ReadInt() {
 			return dat[pos++] + ((1 << 8) * dat[pos++]) + ((1 << 16) * dat[pos++]) + ((1 << 24) * dat[pos++]);
 		}
+		public string ReadString(int l) {
+			char[] o = new char[l];
+			for(int q = 0; q < l; q++)
+				o[q] = (char)dat[pos + q];
+			pos += l; return new string(o);
+		}
+		public float ReadFloat() {
+			//byte[] b = { dat[pos+3], dat[pos+2], dat[pos+1], dat[pos] };
+			//Single f = BitConverter.ToSingle(b, 0);
+			Single f = BitConverter.ToSingle(dat, pos);
+			pos += 4; return f;
+		}
 
 		public string HexStr(byte[] b) {
 			string s = "";
@@ -198,8 +223,9 @@ namespace DemiseAscensionReader {
 		#endregion IO
 		#region Dungeon
 		public void LoadMap() {
-			ByteConverter bc = new ByteConverter(); pos = 18;
+			ByteConverter bc = new ByteConverter(); pos = 0;
 			map = new Dungeon();
+			map.header = ReadBytes(18);
 			map.zm = ReadShort(); // Max z coordinate of level, always 45
 			map.xm = ReadShort(); // Max x coordinate of level, always 90
 			map.ym = ReadShort(); // Max y coordinate of level, always 90
@@ -364,9 +390,93 @@ namespace DemiseAscensionReader {
 		#endregion Dungeon
 		#region Monsters
 		public void LoadMonsters() {
+			ByteConverter bc = new ByteConverter(); pos = 0;
+			Monster.header = ReadBytes(18);
+			Monster.huk1 = ReadShort();
+			Monster.huk2 = ReadShort();
+			Monster.nummon = ReadShort(); // Max number of monsters
+			//Monster.nummon = 5;
+			mons = new Monster[Monster.nummon];
+			for(int mon = 0; mon < Monster.nummon; mon++) {
+				mons[mon] = new Monster();
+				mons[mon].namelen1 = ReadShort();
+				mons[mon].namelen2 = ReadShort();
+				mons[mon].name = ReadString(mons[mon].namelen1);
+				mons[mon].att = ReadShort();
+				mons[mon].def = ReadShort();
+				mons[mon].monid = ReadShort();
+				mons[mon].hp = ReadShort();
+				mons[mon].uk = ReadBytes(8);
+				mons[mon].res = new short[12];
+				for(int i = 0; i < 12; i++) mons[mon].res[i] = ReadShort();
+				mons[mon].abil = new float[23];
+				for(int i = 0; i < 23; i++) mons[mon].abil[i] = ReadFloat();
+				mons[mon].uk2 = ReadBytes(100);
+				mons[mon].uk3 = ReadBytes(100);
+			}
+
+			MessageBox.Show("Monsters loaded! Printing the monsters!");
+			ShowMonsters(0, 0); nomouse = false;
 
 		}
-		public void ShowMonsters() {
+		public void ShowMonsters(int nv, int np) {
+			lv = (nv + Monster.nummon) % Monster.nummon;
+			page = (np + 3) % 3;
+			gb.Clear(Color.Black); Monster mon; int num; String fmt = "", s = "";
+			switch(page) {
+				case 0:
+					fmt = "{0,3} {1,24} {2,4}/{3,4} {4,5} {5,5} {6,16} " +
+						"{7,3} {8,3} {9,3} {10,3} {11,3} {12,3} {13,3} {14,3} {15,3} {16,3} {17,3} {18,3} " +
+						"{19,1} {20,1} {21,1} {22,1} {23,1} {24,1} {25,1} {26,2} {27,1} {28,1} " +
+						"{29,1} {30,1} {31,1} {32,3} {33,1} {34,1} {35,1} {36,3} {37,3} {38,1} " +
+						"{39,3} {40,1} {41,1}\n";
+					s = String.Format(fmt, "Num", "Name", "Att", "Def", "MonID", "HP", "Unknown",
+						"Fir", "Col", "Ele", "Min", "Dis", "Poi", "Mag", "Sto", "Par", "Dra", "Aci", "Age",
+						"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+						"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "1", "2",
+						"Unknown2", "Unknown3");
+					break;
+				case 1:
+					fmt = "{0,3} {1,24} {2}\n";
+					s = String.Format(fmt, "Num", "Name", "Unknown2");
+					break;
+				case 2:
+					fmt = "{0,3} {1,24} {2}\n";
+					s = String.Format(fmt, "Num", "Name", "Unknown3");
+					break;
+				default:
+					fmt = ""; s = "";
+					break;
+			}
+			for (int q = lv; q < lv + 60; q++) {
+				num = q % Monster.nummon; mon = mons[num];
+				switch(page) {
+					case 0:
+						s += String.Format(fmt,
+							num, mon.name, mon.att, mon.def, mon.monid, mon.hp, HexStr(mon.uk),
+							mon.res[0], mon.res[1], mon.res[2], mon.res[3], mon.res[4], mon.res[5], mon.res[6],
+							mon.res[7], mon.res[8], mon.res[9], mon.res[10], mon.res[11],
+							mon.abil[0], mon.abil[1], mon.abil[2], mon.abil[3], mon.abil[4],
+							mon.abil[5], mon.abil[6], mon.abil[7], mon.abil[8], mon.abil[9],
+							mon.abil[10], mon.abil[11], mon.abil[12], mon.abil[13], mon.abil[14],
+							mon.abil[15], mon.abil[16], mon.abil[17], mon.abil[18], mon.abil[19],
+							mon.abil[20], mon.abil[21], mon.abil[22]);
+						break;
+					case 1:
+						s += String.Format(fmt,
+							num, mon.name, HexStr(mon.uk2));
+						break;
+					case 2:
+						s += String.Format(fmt,
+							num, mon.name, HexStr(mon.uk3));
+						break;
+					default:
+						break;
+				}
+
+			}
+			gb.DrawString(s, Font, Brushes.White, 0, 0);
+			gf.DrawImage(gi, 0, 0);
 
 		}
 		#endregion Monsters

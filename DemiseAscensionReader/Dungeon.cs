@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace DemiseAscensionReader {
 	class Dungeon {
+		public byte[] header;
 		public short xm, ym, zm; public int gm; public int[] offset;// = new int[45];
 		public struct Sqr {
 			public short te, tw, tn, ts, tf, tc, m, g; public byte r;
