@@ -30,6 +30,7 @@ namespace DemiseAscensionReader {
 		System.IO.FileStream io; bool changed = false;
 		Dungeon map; int lv; Dungeon.Sqr csq; Dungeon.Grp cgp;
 		Monster[] mons; int page = 0; Monster cmon;
+		Item[] items; Item citem;
 	#endregion Files
 
 #endregion Variables
@@ -81,6 +82,18 @@ namespace DemiseAscensionReader {
 								case Keys.Down: ShowMonsters(++lv, page); break;
 								case Keys.Left: ShowMonsters(lv, --page); break;
 								case Keys.Right: ShowMonsters(lv, ++page); break;
+							}
+							break;
+						case "DEMISEItems":
+							switch(e.KeyCode) {
+								case Keys.Home: ShowItems(0, page); break;
+								case Keys.End: ShowItems(Item.numitems - 60, page); break;
+								case Keys.PageUp: ShowItems(lv - 60, page); break;
+								case Keys.PageDown: ShowItems(lv + 60, page); break;
+								case Keys.Up: ShowItems(--lv, page); break;
+								case Keys.Down: ShowItems(++lv, page); break;
+								case Keys.Left: ShowItems(lv, --page); break;
+								case Keys.Right: ShowItems(lv, ++page); break;
 							}
 							break;
 						default: // Unknown Mode
@@ -170,6 +183,7 @@ namespace DemiseAscensionReader {
 			switch(mode) {
 				case "DEMISEDungeon": MessageBox.Show("Loading the map!"); LoadMap(); break;
 				case "DEMISEMonsters": MessageBox.Show("Loading the monsters!"); LoadMonsters(); break;
+				case "DEMISEItems": MessageBox.Show("Loading the items!"); LoadItems(); break;
 				default: MessageBox.Show(mode); ShowHex(0); break;
 			}
 		}
@@ -411,8 +425,14 @@ namespace DemiseAscensionReader {
 				for(int i = 0; i < 12; i++) mons[mon].res[i] = ReadShort();
 				mons[mon].abil = new float[23];
 				for(int i = 0; i < 23; i++) mons[mon].abil[i] = ReadFloat();
-				mons[mon].uk2 = ReadBytes(100);
-				mons[mon].uk3 = ReadBytes(100);
+				mons[mon].spells = new short[24];
+				for(int i = 0; i < 24; i++) mons[mon].spells[i] = ReadShort();
+				mons[mon].uk2 = ReadBytes(26);
+				mons[mon].stats = new short[7];
+				for(int i = 0; i < 7; i++) mons[mon].stats[i] = ReadShort();
+				mons[mon].type = ReadShort();
+				mons[mon].uk3 = ReadBytes(10);
+				mons[mon].uk4 = ReadBytes(72); //items 72, monsters 100
 			}
 
 			MessageBox.Show("Monsters loaded! Printing the monsters!");
@@ -421,54 +441,103 @@ namespace DemiseAscensionReader {
 		}
 		public void ShowMonsters(int nv, int np) {
 			lv = (nv + Monster.nummon) % Monster.nummon;
-			page = (np + 3) % 3;
+			page = (np + 5) % 5;
 			gb.Clear(Color.Black); Monster mon; int num; String fmt = "", s = "";
 			switch(page) {
 				case 0:
-					fmt = "{0,3} {1,24} {2,4}/{3,4} {4,5} {5,5} {6,16} " +
-						"{7,3} {8,3} {9,3} {10,3} {11,3} {12,3} {13,3} {14,3} {15,3} {16,3} {17,3} {18,3} " +
-						"{19,1} {20,1} {21,1} {22,1} {23,1} {24,1} {25,1} {26,2} {27,1} {28,1} " +
-						"{29,1} {30,1} {31,1} {32,3} {33,1} {34,1} {35,1} {36,3} {37,3} {38,1} " +
-						"{39,3} {40,1} {41,1}\n";
-					s = String.Format(fmt, "Num", "Name", "Att", "Def", "MonID", "HP", "Unknown",
-						"Fir", "Col", "Ele", "Min", "Dis", "Poi", "Mag", "Sto", "Par", "Dra", "Aci", "Age",
-						"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-						"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "1", "2",
-						"Unknown2", "Unknown3");
+					fmt = "{0,3} {1,24} {2,4}/{3,4} {4,5} {5,5} " +
+						"{6,3} {7,3} {8,3} {9,3} {10,3} {11,3} {12,3} {13,11}  " +
+						"{14,16} " +
+						"{15,3} {16,3} {17,3} {18,3} {19,3} {20,3} {21,3} {22,3} {23,3} {24,3} {25,3} {26,3}\n";
+					s = String.Format(fmt, "Num", "Name", "Att", "Def", "MonID", "HP", 
+						"Str", "Int", "Wis", "Con", "Cha", "Dex", "   ", "Type",
+						"Unknown",
+						"Fir", "Col", "Ele", "Min", "Dis", "Poi", "Mag", "Sto", "Par", "Dra", "Aci", "Age");
 					break;
 				case 1:
-					fmt = "{0,3} {1,24} {2}\n";
-					s = String.Format(fmt, "Num", "Name", "Unknown2");
+					fmt = "{0,3} {1,24} " +
+						"{02,7} {03,7} {04,7} {05,7} {06,7}  {07,7} {08,7} {09,7} {10,7} {11,7}  " +
+						"{12,7} {13,7} {14,7} {15,7} {16,7}  {17,7} {18,7} {19,7} {20,7} {21,7}  " +
+						"{22,7} {23,7} {24,7}\n";
+					s = String.Format(fmt, "Num", "Name",
+						" SeeInv", "  Invis", " MagRes", "ChrmRes", "WeapRes",
+						"ComplWR", " Unused", " Poison", "Disease", "Paralyz",
+						"BrthFir", "BrthCol", "SpitAcd", "Electro", "  Drain",
+						"Stone", "    Age", "CritHit", "BckStab", "DstrItm",
+						"  Steal", " Behead", "Unused");
 					break;
 				case 2:
-					fmt = "{0,3} {1,24} {2}\n";
-					s = String.Format(fmt, "Num", "Name", "Unknown3");
+					fmt = "{0,3} {1,24} " +
+						"{02,7} {03,7} {04,7} {05,7} {06,7}  {07,7} {08,7} {09,7} {10,7} {11,7}  " +
+						"{12,7} {13,7} {14,7} {15,7} {16,7}  {17,7} {18,7} {19,7} {20,7} {21,7}  " +
+						"{22,7} {23,7} {24,7} {25,7}\n";
+					s = String.Format(fmt, "Num", "Name",
+						"   Fire", "   Cold", " Electr", "   Mind", " Damage",
+						"Element", "   Kill", "  Charm", "   Bind", "   Heal",
+						"Movemnt", " Banish", " Dispel", " Resist", " Visual",
+						"Magical", "Locaton", "Protect", "MDamage", " MDeath",
+						"MAlchem", "  MHeal", "  MMove", "Unobtan");
+					break;
+				case 3:
+					fmt = "{0,3} {1,24} {2,52} {3,28}\n";
+					s = String.Format(fmt, "Num", "Name", "Unknown2", "Unknown3");
+					break;
+				case 4:
+					fmt = "{0,3} {1,24} {2,200}\n";
+					s = String.Format(fmt, "Num", "Name", "Unknown4");
 					break;
 				default:
 					fmt = ""; s = "";
 					break;
 			}
-			for (int q = lv; q < lv + 60; q++) {
-				num = q % Monster.nummon; mon = mons[num];
+			int fnum = lv; bool filter;
+			for (int q = 0; q < 60; q++) {
+        do {
+					filter = true;
+					num = fnum % Monster.nummon; mon = mons[num];
+					for (int i = 0; i < 23; i++) {
+						if((i == 2 && mon.abil[i] > 0) )// || (i != 2 && mon.abil[i] == 0))
+							filter &= true; else filter &= false;
+					}
+					fnum++;
+        } while (false && filter == false);
+				if(q > 0 && fnum == lv) break;
+                
 				switch(page) {
 					case 0:
 						s += String.Format(fmt,
-							num, mon.name, mon.att, mon.def, mon.monid, mon.hp, HexStr(mon.uk),
+							num, mon.name, mon.att, mon.def, mon.monid, mon.hp,
+							mon.stats[0], mon.stats[1], mon.stats[2], mon.stats[3], mon.stats[4], mon.stats[5],
+							mon.stats[6], Monster.types[mon.type],
+							HexStr(mon.uk),
 							mon.res[0], mon.res[1], mon.res[2], mon.res[3], mon.res[4], mon.res[5], mon.res[6],
-							mon.res[7], mon.res[8], mon.res[9], mon.res[10], mon.res[11],
+							mon.res[7], mon.res[8], mon.res[9], mon.res[10], mon.res[11]);
+						break;
+					case 1:
+						s += String.Format(fmt,
+							num, mon.name,
 							mon.abil[0], mon.abil[1], mon.abil[2], mon.abil[3], mon.abil[4],
 							mon.abil[5], mon.abil[6], mon.abil[7], mon.abil[8], mon.abil[9],
 							mon.abil[10], mon.abil[11], mon.abil[12], mon.abil[13], mon.abil[14],
 							mon.abil[15], mon.abil[16], mon.abil[17], mon.abil[18], mon.abil[19],
 							mon.abil[20], mon.abil[21], mon.abil[22]);
 						break;
-					case 1:
-						s += String.Format(fmt,
-							num, mon.name, HexStr(mon.uk2));
-						break;
 					case 2:
 						s += String.Format(fmt,
-							num, mon.name, HexStr(mon.uk3));
+							num, mon.name,
+							mon.spells[0], mon.spells[1], mon.spells[2], mon.spells[3], mon.spells[4],
+							mon.spells[5], mon.spells[6], mon.spells[7], mon.spells[8], mon.spells[9],
+							mon.spells[10], mon.spells[11], mon.spells[12], mon.spells[13], mon.spells[14],
+							mon.spells[15], mon.spells[16], mon.spells[17], mon.spells[18], mon.spells[19],
+							mon.spells[20], mon.spells[21], mon.spells[22], mon.spells[23]);
+						break;
+					case 3:
+						s += String.Format(fmt,
+							num, mon.name, HexStr(mon.uk2), HexStr(mon.uk3));
+						break;
+					case 4:
+						s += String.Format(fmt,
+							num, mon.name, HexStr(mon.uk4));
 						break;
 					default:
 						break;
@@ -480,6 +549,84 @@ namespace DemiseAscensionReader {
 
 		}
 		#endregion Monsters
+		#region Items
+		public void LoadItems() {
+			ByteConverter bc = new ByteConverter(); pos = 0;
+			Item.header = ReadBytes(18);
+			Item.huk1 = ReadShort();
+			Item.huk2 = ReadShort();
+			Item.numitems = ReadShort(); // Max number of items
+			items = new Item[Item.numitems];
+			for(int item = 0; item < Item.numitems; item++) {
+				items[item] = new Item();
+				items[item].namelen1 = ReadShort();
+				items[item].namelen2 = ReadShort();
+				items[item].name = ReadString(items[item].namelen1);
+				items[item].itemid = ReadShort();
+				items[item].att = ReadShort();
+				items[item].def = ReadShort();
+				items[item].uk = ReadBytes(100);
+				items[item].uk2 = ReadBytes(100);
+				items[item].uk3 = ReadBytes(98);
+			}
+			MessageBox.Show("Items loaded! Printing the items!");
+			ShowItems(0, 0); nomouse = false;
+
+		}
+		public void ShowItems(int nv, int np) {
+			lv = (nv + Item.numitems) % Item.numitems;
+			page = (np + 4) % 4;
+			gb.Clear(Color.Black); Item item; int num; String fmt = "", s = "";
+			switch(page) {
+				case 0:
+					fmt = "{0,3} {1,30} {2,5} {3,4}/{4,4}\n";
+					s = String.Format(fmt, "Num", "Name", "ItemID", "Att", "Def");
+					break;
+				case 1:
+					fmt = "{0,3} {1,30} {2,200}\n";
+					s = String.Format(fmt, "Num", "Name", "Unknown1");
+					break;
+				case 2:
+					fmt = "{0,3} {1,30} {2,200}\n";
+					s = String.Format(fmt, "Num", "Name", "Unknown2");
+					break;
+				case 3:
+					fmt = "{0,3} {1,30} {2,198}\n";
+					s = String.Format(fmt, "Num", "Name", "Unknown3");
+					break;
+
+				default:
+					break;
+			}
+			for(int q = lv; q < lv + 60; q++) {
+				num = q % Item.numitems; item = items[num];
+				switch(page) {
+					case 0:
+						s += String.Format(fmt,
+							num, item.name, item.itemid, item.att, item.def);
+						break;
+					case 1:
+						s += String.Format(fmt,
+							num, item.name, HexStr(item.uk));
+						break;
+					case 2:
+						s += String.Format(fmt,
+							num, item.name, HexStr(item.uk2));
+						break;
+					case 3:
+						s += String.Format(fmt,
+							num, item.name, HexStr(item.uk3));
+						break;
+					default:
+						break;
+				}
+
+			}
+			gb.DrawString(s, Font, Brushes.White, 0, 0);
+			gf.DrawImage(gi, 0, 0);
+
+		}
+		#endregion Items
 		#region Unknown
 		public void ShowHex(int nv) {
 			lv = nv; // if(lv < 0) lv = 0;
