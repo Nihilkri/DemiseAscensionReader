@@ -4,10 +4,13 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using CsvHelper;
+using CsvHelper.Configuration;
 
 namespace DemiseAscensionReader {
 	public partial class Form1 : Form {
@@ -26,11 +29,12 @@ namespace DemiseAscensionReader {
 
 		#endregion Graphics
 		#region Files
-		string fyl = "", mode = ""; byte[] dat; int pos = 0;
+		string fyl = "", dir = "", mode = ""; byte[] dat; int pos = 0;
 		System.IO.FileStream io; bool changed = false;
 		Dungeon map; int lv; Dungeon.Sqr csq; Dungeon.Grp cgp;
 		Monster[] mons; int page = 0; Monster cmon;
 		Item[] items; Item citem;
+		int hexwidth = 0x40, hexheight = 0x50;
 	#endregion Files
 
 #endregion Variables
@@ -82,6 +86,7 @@ namespace DemiseAscensionReader {
 								case Keys.Down: ShowMonsters(++lv, page); break;
 								case Keys.Left: ShowMonsters(lv, --page); break;
 								case Keys.Right: ShowMonsters(lv, ++page); break;
+								case Keys.E: CsVMonsters(); break;
 							}
 							break;
 						case "DEMISEItems":
@@ -100,12 +105,14 @@ namespace DemiseAscensionReader {
 							switch(e.KeyCode) {
 								case Keys.Home: ShowHex(0); break;
 								case Keys.End: ShowHex(-1); break;
-								case Keys.PageUp: ShowHex(lv - 0x1400); break;
-								case Keys.PageDown: ShowHex(lv + 0x1400); break;
-								case Keys.Up: ShowHex(lv - 0x40); break;
-								case Keys.Down: ShowHex(lv + 0x40); break;
+								case Keys.PageUp: ShowHex(lv - hexwidth * hexheight); break;
+								case Keys.PageDown: ShowHex(lv + hexwidth * hexheight); break;
+								case Keys.Up: ShowHex(lv - hexwidth); break;
+								case Keys.Down: ShowHex(lv + hexwidth); break;
 								case Keys.Left: ShowHex(lv - 0x1); break;
 								case Keys.Right: ShowHex(lv + 0x1); break;
+								case Keys.Oemcomma: hexwidth--; ShowHex(lv); break;
+								case Keys.OemPeriod: hexwidth++; ShowHex(lv); break;
 							}
 							break;
 					} break;
@@ -134,7 +141,7 @@ namespace DemiseAscensionReader {
 					x = e.X / 11; y = 89-(e.Y-34)/11; 
 					if(x < 0 || y < 0 || x > 89 || y > 89) return;
 					csq = map.lvs[lv].sq[x, y]; cgp = map.gps[csq.g];
-					gf.FillRectangle(Brushes.Black, 0, 0, 900, 20);
+					gf.FillRectangle(Brushes.Black, 0, 0, 990, 24);
 
 					gf.DrawString("XYZ: (" + (x+1) + "," + (y+1) + "," + (lv+1) + "); TE: " + csq.te + "; TW: " + csq.tw + "; TN: " + csq.tn + "; TS: " + csq.ts + 
 						"; TF: " + csq.tf + "; TC: " + csq.tc + "; M: " + csq.m + "; G: " + csq.g + "; R: " + csq.r, Font, Brushes.White, 0, 0);
@@ -160,24 +167,29 @@ namespace DemiseAscensionReader {
 #endregion Events
 #region Functions
 		public void Open(bool c = true) {
+			bool cancel = false;
 			string InsD = @"C:\Games\Ascension Reader Files";
 			OpenFileDialog ofd = new OpenFileDialog() {
 				Filter = "Demise files (*.DED)|*.DED|Server files (*.MIS)|*.MIS",
 				InitialDirectory = InsD };
 			switch(ofd.ShowDialog()) {
 				case System.Windows.Forms.DialogResult.OK:
-					if(fyl != "") CloseFyl();
-					fyl = ofd.FileName;	io = new System.IO.FileStream(fyl,System.IO.FileMode.Open,System.IO.FileAccess.ReadWrite);
+					if(fyl != "") CloseFyl(); fyl = ofd.FileName;
+					io = new System.IO.FileStream(
+						fyl,System.IO.FileMode.Open,
+						System.IO.FileAccess.ReadWrite);
 					dat = new byte[io.Length]; io.Read(dat, 0, (int)io.Length);
 					if(c) Crypt(); else { MessageBox.Show("You 'crypted " + fyl + "!"); CloseFyl(false);}
 					if(c) MessageBox.Show("You opened " + fyl + "!");
 					break;
-				case System.Windows.Forms.DialogResult.Cancel:	
+				case System.Windows.Forms.DialogResult.Cancel:
+					cancel = true;
 					MessageBox.Show("You hit cancel! " + fyl + " remains open!"); break;
 			}
-			ofd.Dispose(); if(fyl == "") return;
+			ofd.Dispose(); if(cancel) return;
 
 			// Datafile selector
+			dir = fyl.Substring(0, fyl.LastIndexOf('\\') + 1);
 			mode = fyl.Substring(fyl.LastIndexOf('\\') + 1, fyl.Length - fyl.LastIndexOf('\\') - 5);
 			//mode += "Hex";
 			switch(mode) {
@@ -405,11 +417,10 @@ namespace DemiseAscensionReader {
 		#region Monsters
 		public void LoadMonsters() {
 			ByteConverter bc = new ByteConverter(); pos = 0;
-			Monster.header = ReadBytes(18);
+			Monster.header = HexStr(ReadBytes(18));
 			Monster.huk1 = ReadShort();
 			Monster.huk2 = ReadShort();
 			Monster.nummon = ReadShort(); // Max number of monsters
-			//Monster.nummon = 5;
 			mons = new Monster[Monster.nummon];
 			for(int mon = 0; mon < Monster.nummon; mon++) {
 				mons[mon] = new Monster();
@@ -420,19 +431,19 @@ namespace DemiseAscensionReader {
 				mons[mon].def = ReadShort();
 				mons[mon].monid = ReadShort();
 				mons[mon].hp = ReadShort();
-				mons[mon].uk = ReadBytes(8);
+				mons[mon].uk = HexStr(ReadBytes(8));
 				mons[mon].res = new short[12];
 				for(int i = 0; i < 12; i++) mons[mon].res[i] = ReadShort();
 				mons[mon].abil = new float[23];
 				for(int i = 0; i < 23; i++) mons[mon].abil[i] = ReadFloat();
 				mons[mon].spells = new short[24];
 				for(int i = 0; i < 24; i++) mons[mon].spells[i] = ReadShort();
-				mons[mon].uk2 = ReadBytes(26);
+				mons[mon].uk2 = HexStr(ReadBytes(26));
 				mons[mon].stats = new short[7];
 				for(int i = 0; i < 7; i++) mons[mon].stats[i] = ReadShort();
 				mons[mon].type = ReadShort();
-				mons[mon].uk3 = ReadBytes(10);
-				mons[mon].uk4 = ReadBytes(72); //items 72, monsters 100
+				mons[mon].uk3 = HexStr(ReadBytes(10));
+				mons[mon].uk4 = HexStr(ReadBytes(100));
 			}
 
 			MessageBox.Show("Monsters loaded! Printing the monsters!");
@@ -508,8 +519,7 @@ namespace DemiseAscensionReader {
 						s += String.Format(fmt,
 							num, mon.name, mon.att, mon.def, mon.monid, mon.hp,
 							mon.stats[0], mon.stats[1], mon.stats[2], mon.stats[3], mon.stats[4], mon.stats[5],
-							mon.stats[6], Monster.types[mon.type],
-							HexStr(mon.uk),
+							mon.stats[6], Monster.types[mon.type], mon.uk,
 							mon.res[0], mon.res[1], mon.res[2], mon.res[3], mon.res[4], mon.res[5], mon.res[6],
 							mon.res[7], mon.res[8], mon.res[9], mon.res[10], mon.res[11]);
 						break;
@@ -533,11 +543,11 @@ namespace DemiseAscensionReader {
 						break;
 					case 3:
 						s += String.Format(fmt,
-							num, mon.name, HexStr(mon.uk2), HexStr(mon.uk3));
+							num, mon.name, mon.uk2, mon.uk3);
 						break;
 					case 4:
 						s += String.Format(fmt,
-							num, mon.name, HexStr(mon.uk4));
+							num, mon.name, mon.uk4);
 						break;
 					default:
 						break;
@@ -547,6 +557,53 @@ namespace DemiseAscensionReader {
 			gb.DrawString(s, Font, Brushes.White, 0, 0);
 			gf.DrawImage(gi, 0, 0);
 
+		}
+		public void CsVMonsters() {
+			string csvfyl = dir + mode + ".csv";
+			using(StreamWriter writer = new StreamWriter(csvfyl))
+			using(CsvWriter csv = new CsvWriter(writer,
+				System.Globalization.CultureInfo.InvariantCulture)) {
+				Object[] fields;
+				String[] header = {
+					"Num", "Name", "Att", "Def", "MonID", "HP",
+						"Str", "Int", "Wis", "Con", "Cha", "Dex", "   ", "Type",
+						"Unknown",
+						"Fir", "Col", "Ele", "Min", "Dis", "Poi", "Mag", "Sto", "Par", "Dra", "Aci", "Age",
+					" SeeInv", "  Invis", " MagRes", "ChrmRes", "WeapRes",
+						"ComplWR", " Unused", " Poison", "Disease", "Paralyz",
+						"BrthFir", "BrthCol", "SpitAcd", "Electro", "  Drain",
+						"Stone", "    Age", "CritHit", "BckStab", "DstrItm",
+						"  Steal", " Behead", "Unused",
+					"   Fire", "   Cold", " Electr", "   Mind", " Damage",
+						"Element", "   Kill", "  Charm", "   Bind", "   Heal",
+						"Movemnt", " Banish", " Dispel", " Resist", " Visual",
+						"Magical", "Locaton", "Protect", "MDamage", " MDeath",
+						"MAlchem", "  MHeal", "  MMove", "Unobtan",
+						"Unknown2", "Unknown3", "Unknown4" };
+				foreach (String headerItem in header) csv.WriteField(headerItem); csv.NextRecord();
+				for(int num = 0; num < Monster.nummon; num++) {
+					Monster mon = mons[num];
+					fields = new object[] {
+						num, mon.name, mon.att, mon.def, mon.monid, mon.hp,
+						mon.stats[0], mon.stats[1], mon.stats[2], mon.stats[3], mon.stats[4], mon.stats[5],
+						mon.stats[6], Monster.types[mon.type], mon.uk,
+						mon.res[0], mon.res[1], mon.res[2], mon.res[3], mon.res[4], mon.res[5], mon.res[6],
+						mon.res[7], mon.res[8], mon.res[9], mon.res[10], mon.res[11],
+						mon.abil[0], mon.abil[1], mon.abil[2], mon.abil[3], mon.abil[4],
+						mon.abil[5], mon.abil[6], mon.abil[7], mon.abil[8], mon.abil[9],
+						mon.abil[10], mon.abil[11], mon.abil[12], mon.abil[13], mon.abil[14],
+						mon.abil[15], mon.abil[16], mon.abil[17], mon.abil[18], mon.abil[19],
+						mon.abil[20], mon.abil[21], mon.abil[22],
+						mon.spells[0], mon.spells[1], mon.spells[2], mon.spells[3], mon.spells[4],
+						mon.spells[5], mon.spells[6], mon.spells[7], mon.spells[8], mon.spells[9],
+						mon.spells[10], mon.spells[11], mon.spells[12], mon.spells[13], mon.spells[14],
+						mon.spells[15], mon.spells[16], mon.spells[17], mon.spells[18], mon.spells[19],
+						mon.spells[20], mon.spells[21], mon.spells[22], mon.spells[23],
+						mon.uk2, mon.uk3, mon.uk4 };
+					foreach(Object fieldItem in fields) csv.WriteField(fieldItem); csv.NextRecord();
+				}
+			};
+			MessageBox.Show("Monsters exported to " + csvfyl);
 		}
 		#endregion Monsters
 		#region Items
@@ -630,20 +687,20 @@ namespace DemiseAscensionReader {
 		#region Unknown
 		public void ShowHex(int nv) {
 			lv = nv; // if(lv < 0) lv = 0;
-			if(lv < 0 || lv > dat.Length) lv = (int)(dat.Length / 1280);
+			if(lv < 0 || lv > dat.Length) lv = (int)(dat.Length / (hexwidth * hexheight));
 			gb.Clear(Color.Black);
 			String str = "";
 			byte v = 0;
-			Char[] uni = new Char[64];
-			byte[] bytes = new byte[64];
-			for (int y = 0; y < 80; y++) {
-				if(dat.Length < lv + y * 64) break;
-				str += String.Format("{0:X2} {1:X8} ", y, lv + y * 64);
-				for(int x = 0; x < 64; x++) {
-					if(dat.Length <= lv + y * 64 + x) {
+			Char[] uni = new Char[hexwidth];
+			byte[] bytes = new byte[hexwidth];
+			for (int y = 0; y < hexheight; y++) {
+				if(dat.Length < lv + y * hexwidth) break;
+				str += String.Format("{0:X2} {1:X8} ", y, lv + y * hexwidth);
+				for(int x = 0; x < hexwidth; x++) {
+					if(dat.Length <= lv + y * hexwidth + x) {
 						v = bytes[x] = (byte)0; uni[x] = ' ';
 					} else {
-						v = bytes[x] = dat[lv + y * 64 + x];
+						v = bytes[x] = dat[lv + y * hexwidth + x];
 						if(v >= 0x20 && v <= 0xFF && v != 0x84) uni[x] = (char)v; else uni[x] = '.';
 					}
 				}

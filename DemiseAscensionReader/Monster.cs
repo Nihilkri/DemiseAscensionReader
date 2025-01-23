@@ -11,7 +11,7 @@ namespace DemiseAscensionReader {
 		public static string[] types = new string[] {
 			"Humanoid", "Slime", "Demon", "Devil", "Elemental", "Reptile", "Dragon", "Animal", "Insect",
 			"Undead", "Water", "Giant", "Mythical", "Lycanthrope", "Thief", "Mage", "Warrior", "Indigni"};
-		public static byte[] header;
+		public static string header;
 		public static short nummon;
 		public static short huk1;
 		public static short huk2;
@@ -22,14 +22,14 @@ namespace DemiseAscensionReader {
 		public short att, def;
 		public short monid;
 		public short hp;
-		public byte[] uk;
+		public string uk;
 		public short[] res;
 		public float[] abil;
 		public short[] spells;
-		public byte[] uk2;
+		public string uk2;
 		public short[] stats;
 		public short type;
-		public byte[] uk3;
-		public byte[] uk4;
+		public string uk3;
+		public string uk4;
 	}
 }
