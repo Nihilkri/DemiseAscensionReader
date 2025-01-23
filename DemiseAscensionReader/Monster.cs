@@ -23,6 +23,8 @@ namespace DemiseAscensionReader {
 		public short monid;
 		public short hp;
 		public string uk;
+		public byte findlvl;
+		public byte ukb;
 		public short[] res;
 		public float[] abil;
 		public short[] spells;

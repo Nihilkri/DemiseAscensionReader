@@ -431,7 +431,9 @@ namespace DemiseAscensionReader {
 				mons[mon].def = ReadShort();
 				mons[mon].monid = ReadShort();
 				mons[mon].hp = ReadShort();
-				mons[mon].uk = HexStr(ReadBytes(8));
+				mons[mon].uk = HexStr(ReadBytes(6));
+				mons[mon].findlvl = ReadByte();
+				mons[mon].ukb = ReadByte();
 				mons[mon].res = new short[12];
 				for(int i = 0; i < 12; i++) mons[mon].res[i] = ReadShort();
 				mons[mon].abil = new float[23];
@@ -457,13 +459,15 @@ namespace DemiseAscensionReader {
 			switch(page) {
 				case 0:
 					fmt = "{0,3} {1,24} {2,4}/{3,4} {4,5} {5,5} " +
-						"{6,3} {7,3} {8,3} {9,3} {10,3} {11,3} {12,3} {13,11}  " +
-						"{14,16} " +
-						"{15,3} {16,3} {17,3} {18,3} {19,3} {20,3} {21,3} {22,3} {23,3} {24,3} {25,3} {26,3}\n";
+						"{6,3} {7,3} {8,3} {9,3} {10,3} {11,3} {12,3} {13,11} {14,3} {15,3}  " +
+						"{16,16} " +
+						"{17,3} {18,3} {19,3} {20,3} {21,3} {22,3} " + 
+						"{23,3} {24,3} {25,3} {26,3} {27,3} {28,3}\n";
 					s = String.Format(fmt, "Num", "Name", "Att", "Def", "MonID", "HP", 
-						"Str", "Int", "Wis", "Con", "Cha", "Dex", "   ", "Type",
+						"Str", "Int", "Wis", "Con", "Cha", "Dex", "   ", "Type", "Lvl", "Ukb",
 						"Unknown",
-						"Fir", "Col", "Ele", "Min", "Dis", "Poi", "Mag", "Sto", "Par", "Dra", "Aci", "Age");
+						"Fir", "Col", "Ele", "Min", "Dis", "Poi",
+						"Mag", "Sto", "Par", "Dra", "Aci", "Age");
 					break;
 				case 1:
 					fmt = "{0,3} {1,24} " +
@@ -519,7 +523,7 @@ namespace DemiseAscensionReader {
 						s += String.Format(fmt,
 							num, mon.name, mon.att, mon.def, mon.monid, mon.hp,
 							mon.stats[0], mon.stats[1], mon.stats[2], mon.stats[3], mon.stats[4], mon.stats[5],
-							mon.stats[6], Monster.types[mon.type], mon.uk,
+							mon.stats[6], Monster.types[mon.type], mon.findlvl, mon.ukb, mon.uk,
 							mon.res[0], mon.res[1], mon.res[2], mon.res[3], mon.res[4], mon.res[5], mon.res[6],
 							mon.res[7], mon.res[8], mon.res[9], mon.res[10], mon.res[11]);
 						break;
@@ -567,8 +571,9 @@ namespace DemiseAscensionReader {
 				String[] header = {
 					"Num", "Name", "Att", "Def", "MonID", "HP",
 						"Str", "Int", "Wis", "Con", "Cha", "Dex", "   ", "Type",
-						"Unknown",
-						"Fir", "Col", "Ele", "Min", "Dis", "Poi", "Mag", "Sto", "Par", "Dra", "Aci", "Age",
+						"Lvl", "Ukb", "Unknown",
+						"Fir", "Col", "Ele", "Min", "Dis", "Poi",
+						"Mag", "Sto", "Par", "Dra", "Aci", "Age",
 					" SeeInv", "  Invis", " MagRes", "ChrmRes", "WeapRes",
 						"ComplWR", " Unused", " Poison", "Disease", "Paralyz",
 						"BrthFir", "BrthCol", "SpitAcd", "Electro", "  Drain",
@@ -586,7 +591,7 @@ namespace DemiseAscensionReader {
 					fields = new object[] {
 						num, mon.name, mon.att, mon.def, mon.monid, mon.hp,
 						mon.stats[0], mon.stats[1], mon.stats[2], mon.stats[3], mon.stats[4], mon.stats[5],
-						mon.stats[6], Monster.types[mon.type], mon.uk,
+						mon.stats[6], Monster.types[mon.type], mon.findlvl, mon.ukb, mon.uk,
 						mon.res[0], mon.res[1], mon.res[2], mon.res[3], mon.res[4], mon.res[5], mon.res[6],
 						mon.res[7], mon.res[8], mon.res[9], mon.res[10], mon.res[11],
 						mon.abil[0], mon.abil[1], mon.abil[2], mon.abil[3], mon.abil[4],
