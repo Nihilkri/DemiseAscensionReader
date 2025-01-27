@@ -627,9 +627,11 @@ namespace DemiseAscensionReader {
 				items[item].itemid = ReadShort();
 				items[item].att = ReadShort();
 				items[item].def = ReadShort();
-				items[item].uk = ReadBytes(100);
-				items[item].uk2 = ReadBytes(100);
-				items[item].uk3 = ReadBytes(98);
+				items[item].buk = ReadBytes(4);
+				items[item].findlvl = ReadShort();
+				items[item].buk2 = ReadBytes(94);
+				items[item].buk3 = ReadBytes(100);
+				items[item].buk4 = ReadBytes(98);
 			}
 			MessageBox.Show("Items loaded! Printing the items!");
 			ShowItems(0, 0); nomouse = false;
@@ -641,20 +643,20 @@ namespace DemiseAscensionReader {
 			gb.Clear(Color.Black); Item item; int num; String fmt = "", s = "";
 			switch(page) {
 				case 0:
-					fmt = "{0,3} {1,30} {2,5} {3,4}/{4,4}\n";
-					s = String.Format(fmt, "Num", "Name", "ItemID", "Att", "Def");
+					fmt = "{0,3} {1,30} {2,5} {3,4}/{4,4} {5,8} {6,3}\n";
+					s = String.Format(fmt, "Num", "Name", "ItemID", "Att", "Def", "buk", "Lvl");
 					break;
 				case 1:
-					fmt = "{0,3} {1,30} {2,200}\n";
-					s = String.Format(fmt, "Num", "Name", "Unknown1");
+					fmt = "{0,3} {1,30} {2,188}\n";
+					s = String.Format(fmt, "Num", "Name", "Unknown2");
 					break;
 				case 2:
 					fmt = "{0,3} {1,30} {2,200}\n";
-					s = String.Format(fmt, "Num", "Name", "Unknown2");
+					s = String.Format(fmt, "Num", "Name", "Unknown3");
 					break;
 				case 3:
 					fmt = "{0,3} {1,30} {2,198}\n";
-					s = String.Format(fmt, "Num", "Name", "Unknown3");
+					s = String.Format(fmt, "Num", "Name", "Unknown4");
 					break;
 
 				default:
@@ -665,19 +667,19 @@ namespace DemiseAscensionReader {
 				switch(page) {
 					case 0:
 						s += String.Format(fmt,
-							num, item.name, item.itemid, item.att, item.def);
+							num, item.name, item.itemid, item.att, item.def, HexStr(item.buk), item.findlvl);
 						break;
 					case 1:
 						s += String.Format(fmt,
-							num, item.name, HexStr(item.uk));
+							num, item.name, HexStr(item.buk2));
 						break;
 					case 2:
 						s += String.Format(fmt,
-							num, item.name, HexStr(item.uk2));
+							num, item.name, HexStr(item.buk3));
 						break;
 					case 3:
 						s += String.Format(fmt,
-							num, item.name, HexStr(item.uk3));
+							num, item.name, HexStr(item.buk4));
 						break;
 					default:
 						break;

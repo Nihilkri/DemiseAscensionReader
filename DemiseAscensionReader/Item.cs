@@ -18,11 +18,11 @@ namespace DemiseAscensionReader {
 		public string name;
 		public short itemid;
 		public short att, def;
-		public byte[] uk;
-		public byte[] uk2;
-		public byte[] uk3;
-		public byte[] uk4;
-		public byte[] uk5;
+		public byte[] buk;
+		public short findlvl;
+		public byte[] buk2;
+		public byte[] buk3;
+		public byte[] buk4;
 
 
 	}
