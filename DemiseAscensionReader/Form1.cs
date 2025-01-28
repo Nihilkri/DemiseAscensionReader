@@ -627,9 +627,15 @@ namespace DemiseAscensionReader {
 				items[item].itemid = ReadShort();
 				items[item].att = ReadShort();
 				items[item].def = ReadShort();
-				items[item].buk = ReadBytes(4);
+				items[item].buk1 = ReadInt();
 				items[item].findlvl = ReadShort();
-				items[item].buk2 = ReadBytes(94);
+				items[item].suk1 = ReadShort();
+				items[item].abil = new float[17];
+				for (int i = 0; i < items[item].abil.Length; i++)
+					items[item].abil[i] = ReadFloat();
+				items[item].swings = ReadShort();
+				items[item].suk2 = ReadShort();
+				items[item].buk2 = ReadBytes(20);
 				items[item].buk3 = ReadBytes(100);
 				items[item].buk4 = ReadBytes(98);
 			}
@@ -643,11 +649,19 @@ namespace DemiseAscensionReader {
 			gb.Clear(Color.Black); Item item; int num; String fmt = "", s = "";
 			switch(page) {
 				case 0:
-					fmt = "{0,3} {1,30} {2,5} {3,4}/{4,4} {5,8} {6,3}\n";
-					s = String.Format(fmt, "Num", "Name", "ItemID", "Att", "Def", "buk", "Lvl");
+					fmt = "{0,3} {1,30} {2,5} {3,4}/{4,4} " +
+						"{5,8} {6,3} {7,4} " +
+						"{8,4} {9,4} {10,4} {11,4} {12,4} {13,4} {14,4} {15,4} " +
+						"{16,4} {17,4} {18,4} {19,4} {20,4} {21,4} {22,4} {23,4} {24,4} " +
+						"{25,4} {26,4} \n";
+					s = String.Format(fmt, "Num", "Name", "ItemID", "Att", "Def",
+						"Value", "Lvl", "suk1",
+						"Levi", "Invs", "Prot", "SeeI", "Crit", "Stab", "Burn", "Frez",
+						"Pois", "    ", "Elec", "Ston", "Dcap", "HPrg", "SPrg", "Spel", "    ",
+						"Swng", "suk2");
 					break;
 				case 1:
-					fmt = "{0,3} {1,30} {2,188}\n";
+					fmt = "{0,3} {1,30} {2,40}\n";
 					s = String.Format(fmt, "Num", "Name", "Unknown2");
 					break;
 				case 2:
@@ -667,7 +681,13 @@ namespace DemiseAscensionReader {
 				switch(page) {
 					case 0:
 						s += String.Format(fmt,
-							num, item.name, item.itemid, item.att, item.def, HexStr(item.buk), item.findlvl);
+							num, item.name, item.itemid, item.att, item.def, item.buk1, item.findlvl, 
+							item.suk1,
+							item.abil[00], item.abil[01], item.abil[02], item.abil[03],
+							item.abil[04], item.abil[05], item.abil[06], item.abil[07],
+							item.abil[08], item.abil[09], item.abil[10], item.abil[11],
+							item.abil[12], item.abil[13], item.abil[14], item.abil[15], item.abil[16],
+							item.swings, item.suk2);
 						break;
 					case 1:
 						s += String.Format(fmt,
