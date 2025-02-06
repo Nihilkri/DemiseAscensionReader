@@ -680,6 +680,9 @@ namespace DemiseAscensionReader {
 
 				items[item].buk4 = ReadBytes(48);
 			}
+			if(!(spells is null))
+				spells = spells.OrderBy(x => x.num).ToArray();
+
 			MessageBox.Show("Items loaded! Printing the items!");
 			ShowItems(0, 0); nomouse = false;
 
@@ -722,7 +725,7 @@ namespace DemiseAscensionReader {
 						"{06,3}{07,2} {08,3}{09,2} " +
 						"{10,3}{11,-3} {12,3}{13,2}" +
 						"{14,2}{15,2} " +
-						"{16,6} {17,3} {18,2} {19,12} " +
+						"{16,6} {17,3} {18,3} {19,12} " +
 						"{20,3} {21,3} {22,3} {23,3} {24,3} " +
 						"{25,3} {26,3} {27,3} {28,3} {29,3} " +
 						"{30,3} {31,3} {32,3} {33,3} {34,3} " +
@@ -733,7 +736,7 @@ namespace DemiseAscensionReader {
 						"Wis", "  ", "Con", "  ",
 						"Cha", "   ", "Dex", "  ",
 						"-", "",
-						"Cursed", "SL", "CR", "DmgMult: Hum",
+						"Cursed", "SL", " CR", "DmgMult: Hum",
 						"Sli", "Dem", "Dev", "Ele", "Rep",
 						"Dra", "Ani", "Ins", "Und", "Wat",
 						"Gia", "Myt", "Lyc", "Thi", "Mag",
@@ -788,7 +791,7 @@ namespace DemiseAscensionReader {
 							item.req[4], (item.mod[4] == 0 ? "  " : (item.mod[4] > 0 ? "+" : "") + item.mod[4]),
 							item.req[5], (item.mod[5] == 0 ? "  " : (item.mod[5] > 0 ? "+" : "") + item.mod[5]),
 							item.req[6], (item.mod[6] == 0 ? "  " : (item.mod[6] > 0 ? "+" : "") + item.mod[6]),
-							item.cursed, item.SL, item.CR,
+							item.cursed, item.SL, item.CR == 0 ? "NCR" : " CR",
 							item.dmgmult[00] == 1.0 ? "_" : "" + item.dmgmult[00],
 							item.dmgmult[01] == 1.0 ? "_" : "" + item.dmgmult[01],
 							item.dmgmult[02] == 1.0 ? "_" : "" + item.dmgmult[02],
@@ -873,7 +876,7 @@ namespace DemiseAscensionReader {
 				spells[spell].suk7 = ReadShort();
 				spells[spell].sp4 = ReadBytes(12);
 			}
-			//spells = spells.OrderBy(x => x.type).ToArray();
+			spells = spells.OrderBy(x => x.type).ToArray();
 			MessageBox.Show("Spells loaded! Printing the spells!");
 			ShowSpells(0, 0); nomouse = false;
 
