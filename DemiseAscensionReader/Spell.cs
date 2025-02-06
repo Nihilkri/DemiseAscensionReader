@@ -17,14 +17,40 @@ namespace DemiseAscensionReader {
 			"Magical", "Location", "Protection", "Morkal Damage", "Morkal Death",
 			"Morkal Alchemy", "Morkal Healing", "Morkal Movement", "Unobtainable"};
 		public static byte[] header;
-		public static short numspell;
+		public static short numspells;
 		public static short huk1;
-		public static short huk2;
 
-
-		public short namelen1, namelen2;
+		public short num;
+		public short namelen1;
+		public short namelen2;
 		public string name;
-
-		public byte[] uk;
+		public short spellid;
+		public short type;
+		public short lvl;
+		public short suk1;
+		public short range;
+		public short suk2;
+		public short mons;
+		public short groups;
+		public short A;
+		public short B;
+		public short suk3;
+		public short reqstr;
+		public short reqint;
+		public short reqwis;
+		public short reqcon;
+		public short reqcha;
+		public short reqdex;
+		public short suk4;
+		public short resist;
+		public short suk5;
+		public short suk6;
+		public byte[] sp1; // 8 bytes
+		public short[] OL;
+		public byte[] sp2; // 8 bytes
+		public short[] OC;
+		public byte[] sp3; // 8 bytes
+		public short suk7;
+		public byte[] sp4; // 12 bytes
 	}
 }

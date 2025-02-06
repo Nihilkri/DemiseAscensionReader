@@ -34,6 +34,7 @@ namespace DemiseAscensionReader {
 		Dungeon map; int lv; Dungeon.Sqr csq; Dungeon.Grp cgp;
 		Monster[] mons; int page = 0; Monster cmon;
 		Item[] items; Item citem;
+		Spell[] spells; Spell cspell;
 		int hexwidth = 0x40, hexheight = 0x50;
 	#endregion Files
 
@@ -79,28 +80,37 @@ namespace DemiseAscensionReader {
 						case "DEMISEMonsters":
 							switch(e.KeyCode) {
 								case Keys.Home: ShowMonsters(0, page); break;
-								case Keys.End: ShowMonsters(Monster.nummon-60, page); break;
-								case Keys.PageUp: ShowMonsters(lv-60, page); break;
-								case Keys.PageDown: ShowMonsters(lv+60, page); break;
+								case Keys.End: ShowMonsters(Monster.nummon - 75, page); break;
+								case Keys.PageUp: ShowMonsters(lv - 75, page); break;
+								case Keys.PageDown: ShowMonsters(lv + 75, page); break;
 								case Keys.Up: ShowMonsters(--lv, page); break;
 								case Keys.Down: ShowMonsters(++lv, page); break;
 								case Keys.Left: ShowMonsters(lv, --page); break;
 								case Keys.Right: ShowMonsters(lv, ++page); break;
 								case Keys.E: CsVMonsters(); break;
-							}
-							break;
+							} break;
 						case "DEMISEItems":
 							switch(e.KeyCode) {
 								case Keys.Home: ShowItems(0, page); break;
-								case Keys.End: ShowItems(Item.numitems - 60, page); break;
-								case Keys.PageUp: ShowItems(lv - 60, page); break;
-								case Keys.PageDown: ShowItems(lv + 60, page); break;
+								case Keys.End: ShowItems(Item.numitems - 75, page); break;
+								case Keys.PageUp: ShowItems(lv - 75, page); break;
+								case Keys.PageDown: ShowItems(lv + 75, page); break;
 								case Keys.Up: ShowItems(--lv, page); break;
 								case Keys.Down: ShowItems(++lv, page); break;
 								case Keys.Left: ShowItems(lv, --page); break;
 								case Keys.Right: ShowItems(lv, ++page); break;
-							}
-							break;
+							} break;
+						case "DEMISESpells":
+							switch(e.KeyCode) {
+								case Keys.Home: ShowSpells(0, page); break;
+								case Keys.End: ShowSpells(Spell.numspells - 75, page); break;
+								case Keys.PageUp: ShowSpells(lv - 75, page); break;
+								case Keys.PageDown: ShowSpells(lv + 75, page); break;
+								case Keys.Up: ShowSpells(--lv, page); break;
+								case Keys.Down: ShowSpells(++lv, page); break;
+								case Keys.Left: ShowSpells(lv, --page); break;
+								case Keys.Right: ShowSpells(lv, ++page); break;
+							} break;
 						default: // Unknown Mode
 							switch(e.KeyCode) {
 								case Keys.Home: ShowHex(0); break;
@@ -113,8 +123,7 @@ namespace DemiseAscensionReader {
 								case Keys.Right: ShowHex(lv + 0x1); break;
 								case Keys.Oemcomma: hexwidth--; ShowHex(lv); break;
 								case Keys.OemPeriod: hexwidth++; ShowHex(lv); break;
-							}
-							break;
+							} break;
 					} break;
 
 
@@ -186,7 +195,7 @@ namespace DemiseAscensionReader {
 					cancel = true;
 					MessageBox.Show("You hit cancel! " + fyl + " remains open!"); break;
 			}
-			ofd.Dispose(); if(cancel) return;
+			ofd.Dispose(); if(cancel || fyl == "") return;
 
 			// Datafile selector
 			dir = fyl.Substring(0, fyl.LastIndexOf('\\') + 1);
@@ -196,6 +205,7 @@ namespace DemiseAscensionReader {
 				case "DEMISEDungeon": MessageBox.Show("Loading the map!"); LoadMap(); break;
 				case "DEMISEMonsters": MessageBox.Show("Loading the monsters!"); LoadMonsters(); break;
 				case "DEMISEItems": MessageBox.Show("Loading the items!"); LoadItems(); break;
+				case "DEMISESpells": MessageBox.Show("Loading the spells!"); LoadSpells(); break;
 				default: MessageBox.Show(mode); ShowHex(0); break;
 			}
 		}
@@ -211,7 +221,10 @@ namespace DemiseAscensionReader {
 		byte[] kii = new byte[] { 0x1E, 0x2E, 0x9D, 0xF4, 0xCE, 0x38, 0xB0, 0xC6 };
 		public void Crypt() {
 			//return;
-			if(fyl == "") return; for(int q=0 ; q < dat.Length ; q++) { dat[q] = (byte)(dat[q] ^ kii[q % kii.Length]); }
+			if(fyl == "") return;
+			for(int q=0 ; q < dat.Length ; q++) {
+				dat[q] = (byte)(dat[q] ^ kii[q % kii.Length]);
+			}
 		}
 #endregion Functions
 		#region IO
@@ -506,7 +519,7 @@ namespace DemiseAscensionReader {
 					break;
 			}
 			int fnum = lv; bool filter;
-			for (int q = 0; q < 60; q++) {
+			for (int q = 0; q < 75; q++) {
         do {
 					filter = true;
 					num = fnum % Monster.nummon; mon = mons[num];
@@ -676,7 +689,7 @@ namespace DemiseAscensionReader {
 				default:
 					break;
 			}
-			for(int q = lv; q < lv + 60; q++) {
+			for(int q = lv; q < lv + 75; q++) {
 				num = q % Item.numitems; item = items[num];
 				switch(page) {
 					case 0:
@@ -711,6 +724,137 @@ namespace DemiseAscensionReader {
 
 		}
 		#endregion Items
+		#region Spells
+		public void LoadSpells() {
+			ByteConverter bc = new ByteConverter(); pos = 0;
+			Spell.header = ReadBytes(18);
+			Spell.huk1 = ReadShort();
+			Spell.numspells = ReadShort(); // Max number of spells
+			//MessageBox.Show(Spell.numspells + " spells!");
+			spells = new Spell[Spell.numspells];
+			for(short spell = 0; spell < Spell.numspells; spell++) {
+				spells[spell] = new Spell();
+				spells[spell].num = spell;
+				spells[spell].namelen1 = ReadShort();
+				spells[spell].namelen2 = ReadShort();
+				spells[spell].name = ReadString(spells[spell].namelen1);
+				spells[spell].spellid = ReadShort();
+				spells[spell].type = ReadShort();
+				spells[spell].lvl = ReadShort();
+				spells[spell].suk1 = ReadShort();
+				spells[spell].range = ReadShort();
+				spells[spell].suk2 = ReadShort();
+				spells[spell].mons = ReadShort();
+				spells[spell].groups = ReadShort();
+				spells[spell].A = ReadShort();
+				spells[spell].B = ReadShort();
+				spells[spell].suk3 = ReadShort();
+				spells[spell].reqstr = ReadShort();
+				spells[spell].reqint = ReadShort();
+				spells[spell].reqwis = ReadShort();
+				spells[spell].reqcon = ReadShort();
+				spells[spell].reqcha = ReadShort();
+				spells[spell].reqdex = ReadShort();
+				spells[spell].suk4 = ReadShort();
+				spells[spell].resist = ReadShort();
+				spells[spell].suk5 = ReadShort();
+				spells[spell].suk6 = ReadShort();
+				spells[spell].sp1 = ReadBytes(6);
+				spells[spell].OL = new short[12];
+				for (int i = 0; i < 12; i++)
+					spells[spell].OL[i] = ReadShort();
+				spells[spell].sp2 = ReadBytes(8);
+				spells[spell].OC = new short[12];
+				for(int i = 0; i < 12; i++)
+					spells[spell].OC[i] = ReadShort();
+				spells[spell].sp3 = ReadBytes(8);
+				spells[spell].suk7 = ReadShort();
+				spells[spell].sp4 = ReadBytes(12);
+			}
+			spells = spells.OrderBy(x => x.type).ToArray();
+			MessageBox.Show("Spells loaded! Printing the spells!");
+			ShowSpells(0, 0); nomouse = false;
+
+		}
+		public void ShowSpells(int nv, int np) {
+			lv = (nv + Spell.numspells) % Spell.numspells;
+			page = (np + 4) % 4;
+			gb.Clear(Color.Black); Spell spell; int num; String fmt = "", s = "";
+			switch(page) {
+				case 0:
+					fmt = "{0,3} {1,30} {2,3} {3,3} {4,15} " +
+						"{5,3} {6,3} {7,2} {8,2} {9,3} {10,2} " +
+						"{11,3} {12,3} {13,3} {14,3} {15,3} {16,3} " +
+						"{17,3} \n";
+					s = String.Format(fmt, "  #", "Name", "Num", " ID", "Type",
+						"lvl", "rng", "#m", "#g", "  A", " B",
+						"str", "int", "wis", "con", "cha", "dex",
+						"res");
+					break;
+				case 1:
+					fmt = "{0,3} {1,30} " +
+						"{02,8} {03,4} {04,4} {05,4} {06,4} {07,4} " +
+						"{08,4} {09,4} {10,4} {11,4} {12,4} {13,4} " +
+						"{14,12} {15,4} {16,4} {17,4} {18,4} {19,4} " +
+						"{20,4} {21,4} {22,4} {23,4} {24,4} {25,4} \n";
+					s = String.Format(fmt, "  #", "Name",
+						"OL: Art", "War", "Pal", "Nin", "Vil", "Exp",
+						"Thi", "Bar", "Mag", "Sor", "Wlk", "Cle",
+						"OC: Art", "War", "Pal", "Nin", "Vil", "Exp",
+						"Thi", "Bar", "Mag", "Sor", "Wlk", "Cle");
+					break;
+				case 2:
+					fmt = "{0,3} {1,30} {2,4} {3,4} " +
+						"{4,4} {5,4} {6,4} {7,4} {8,4} \n";
+					s = String.Format(fmt, "  #", "Name", "suk1", "suk2",
+						"suk3", "suk4", "suk5", "suk6", "suk7");
+					break;
+				case 3:
+					fmt = "{0,3} {1,30} {2,12} {3,16} {4,16} {5,24} \n";
+					s = String.Format(fmt, "  #", "Name", "sp1", "sp2", "sp3", "sp4");
+					break;
+
+				default:
+					break;
+			}
+			for(int q = lv; q < lv + 75; q++) {
+				num = q % Spell.numspells; spell = spells[num];
+				switch(page) {
+					case 0:
+						s += String.Format(fmt,
+							num, spell.name, spell.num, spell.spellid, Spell.types[spell.type],
+							spell.lvl, spell.range, spell.mons, spell.groups, spell.A, spell.B,
+							spell.reqstr, spell.reqint, spell.reqwis, spell.reqcon, spell.reqcha, spell.reqdex,
+							spell.resist);
+						break;
+					case 1:
+						s += String.Format(fmt, num, spell.name,
+							spell.OL[0], spell.OL[1], spell.OL[2], spell.OL[3], spell.OL[4], spell.OL[5],
+							spell.OL[6], spell.OL[7], spell.OL[8], spell.OL[9], spell.OL[10], spell.OL[11],
+							spell.OC[0], spell.OC[1], spell.OC[2], spell.OC[3], spell.OC[4], spell.OC[5],
+							spell.OC[6], spell.OC[7], spell.OC[8], spell.OC[9], spell.OC[10], spell.OC[11]);
+						break;
+					case 2:
+						s += String.Format(fmt,
+							num, spell.name, spell.suk1, spell.suk2,
+							spell.suk3, spell.suk4, spell.suk5, spell.suk6, spell.suk7);
+						break;
+					case 3:
+						s += String.Format(fmt,
+							num, spell.name, HexStr(spell.sp1), HexStr(spell.sp2),
+							HexStr(spell.sp3), HexStr(spell.sp4));
+						break;
+					default:
+						break;
+				}
+
+			}
+			gb.DrawString(s, Font, Brushes.White, 0, 0);
+			gf.DrawImage(gi, 0, 0);
+
+		}
+
+		#endregion Spells
 		#region Unknown
 		public void ShowHex(int nv) {
 			lv = nv; // if(lv < 0) lv = 0;

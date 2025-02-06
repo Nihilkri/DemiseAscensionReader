@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace DemiseAscensionReader {
 	class Item {
+		public static string[] guilds = new string[] { 
+			"Art", "War", "Pal", "Nin", "Vil", "Exp", "Thi", "Bar", "Mag", "Sor", "Wlk", "Cle" };
 		public static string[] types = new string[] {};
 
 		public static byte[] header;

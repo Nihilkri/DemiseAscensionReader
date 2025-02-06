@@ -7,20 +7,20 @@
       "RelativeMoniker": "D:0:0:{08F3A8BE-1FEB-4E3E-8709-11D5D54C875D}|DemiseAscensionReader\\DemiseAscensionReader.csproj|solutionrelative:demiseascensionreader\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{08F3A8BE-1FEB-4E3E-8709-11D5D54C875D}|DemiseAscensionReader\\DemiseAscensionReader.csproj|c:\\users\\nihil\\source\\repos\\demiseascensionreader\\demiseascensionreader\\item.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{08F3A8BE-1FEB-4E3E-8709-11D5D54C875D}|DemiseAscensionReader\\DemiseAscensionReader.csproj|C:\\Users\\Nihil\\source\\repos\\DemiseAscensionReader\\demiseascensionreader\\item.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{08F3A8BE-1FEB-4E3E-8709-11D5D54C875D}|DemiseAscensionReader\\DemiseAscensionReader.csproj|solutionrelative:demiseascensionreader\\item.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{08F3A8BE-1FEB-4E3E-8709-11D5D54C875D}|DemiseAscensionReader\\DemiseAscensionReader.csproj|c:\\users\\nihil\\source\\repos\\demiseascensionreader\\demiseascensionreader\\spell.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{08F3A8BE-1FEB-4E3E-8709-11D5D54C875D}|DemiseAscensionReader\\DemiseAscensionReader.csproj|C:\\Users\\Nihil\\source\\repos\\DemiseAscensionReader\\demiseascensionreader\\spell.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{08F3A8BE-1FEB-4E3E-8709-11D5D54C875D}|DemiseAscensionReader\\DemiseAscensionReader.csproj|solutionrelative:demiseascensionreader\\spell.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{08F3A8BE-1FEB-4E3E-8709-11D5D54C875D}|DemiseAscensionReader\\DemiseAscensionReader.csproj|c:\\users\\nihil\\source\\repos\\demiseascensionreader\\demiseascensionreader\\monster.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{08F3A8BE-1FEB-4E3E-8709-11D5D54C875D}|DemiseAscensionReader\\DemiseAscensionReader.csproj|solutionrelative:demiseascensionreader\\monster.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{08F3A8BE-1FEB-4E3E-8709-11D5D54C875D}|DemiseAscensionReader\\DemiseAscensionReader.csproj|C:\\Users\\Nihil\\source\\repos\\DemiseAscensionReader\\demiseascensionreader\\dungeon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{08F3A8BE-1FEB-4E3E-8709-11D5D54C875D}|DemiseAscensionReader\\DemiseAscensionReader.csproj|solutionrelative:demiseascensionreader\\dungeon.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{08F3A8BE-1FEB-4E3E-8709-11D5D54C875D}|DemiseAscensionReader\\DemiseAscensionReader.csproj|C:\\Users\\Nihil\\source\\repos\\DemiseAscensionReader\\demiseascensionreader\\monster.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{08F3A8BE-1FEB-4E3E-8709-11D5D54C875D}|DemiseAscensionReader\\DemiseAscensionReader.csproj|solutionrelative:demiseascensionreader\\monster.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{08F3A8BE-1FEB-4E3E-8709-11D5D54C875D}|DemiseAscensionReader\\DemiseAscensionReader.csproj|C:\\Users\\Nihil\\source\\repos\\DemiseAscensionReader\\demiseascensionreader\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
@@ -33,8 +33,8 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "DockedWidth": 281,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
@@ -42,29 +42,16 @@
               "Title": "Item.cs",
               "DocumentMoniker": "C:\\Users\\Nihil\\source\\repos\\DemiseAscensionReader\\DemiseAscensionReader\\Item.cs",
               "RelativeDocumentMoniker": "DemiseAscensionReader\\Item.cs",
-              "ToolTip": "C:\\Users\\Nihil\\source\\repos\\DemiseAscensionReader\\DemiseAscensionReader\\Item.cs*",
-              "RelativeToolTip": "DemiseAscensionReader\\Item.cs*",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAiwBQAAAAMAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\Nihil\\source\\repos\\DemiseAscensionReader\\DemiseAscensionReader\\Item.cs",
+              "RelativeToolTip": "DemiseAscensionReader\\Item.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAABVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-01-21T17:15:03.325Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Spell.cs",
-              "DocumentMoniker": "C:\\Users\\Nihil\\source\\repos\\DemiseAscensionReader\\DemiseAscensionReader\\Spell.cs",
-              "RelativeDocumentMoniker": "DemiseAscensionReader\\Spell.cs",
-              "ToolTip": "C:\\Users\\Nihil\\source\\repos\\DemiseAscensionReader\\DemiseAscensionReader\\Spell.cs",
-              "RelativeToolTip": "DemiseAscensionReader\\Spell.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAiwBEAAABIAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-21T15:39:33.248Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "Monster.cs",
               "DocumentMoniker": "C:\\Users\\Nihil\\source\\repos\\DemiseAscensionReader\\DemiseAscensionReader\\Monster.cs",
               "RelativeDocumentMoniker": "DemiseAscensionReader\\Monster.cs",
@@ -72,12 +59,11 @@
               "RelativeToolTip": "DemiseAscensionReader\\Monster.cs",
               "ViewState": "AgIAAA4AAAAAAAAAAAAQwBkAAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-19T12:15:51.216Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-01-19T12:15:51.216Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 3,
               "Title": "Dungeon.cs",
               "DocumentMoniker": "C:\\Users\\Nihil\\source\\repos\\DemiseAscensionReader\\DemiseAscensionReader\\Dungeon.cs",
               "RelativeDocumentMoniker": "DemiseAscensionReader\\Dungeon.cs",
@@ -96,7 +82,7 @@
               "RelativeDocumentMoniker": "DemiseAscensionReader\\Form1.cs",
               "ToolTip": "C:\\Users\\Nihil\\source\\repos\\DemiseAscensionReader\\DemiseAscensionReader\\Form1.cs",
               "RelativeToolTip": "DemiseAscensionReader\\Form1.cs",
-              "ViewState": "AgIAAKACAAAAAAAAAAAYwKoCAAAdAAAAAAAAAA==",
+              "ViewState": "AgIAADwDAAAAAAAAAAAqwEEDAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-01-15T04:31:03.54Z",
               "EditorCaption": ""
@@ -110,8 +96,46 @@
               "ToolTip": "C:\\Users\\Nihil\\source\\repos\\DemiseAscensionReader\\DemiseAscensionReader\\Form1.cs [Design]",
               "RelativeToolTip": "DemiseAscensionReader\\Form1.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-15T04:25:51.91Z",
-              "EditorCaption": " [Design]"
+              "WhenOpened": "2025-01-15T04:25:51.91Z"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 281,
+          "SelectedChildIndex": -1,
+          "Children": []
+        }
+      ]
+    },
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "FloatingWindowState": {
+        "Id": "1a28e250-43e5-46b4-a0da-a5293e72abc2",
+        "Display": 1,
+        "X": 48,
+        "Y": 53,
+        "Width": 953,
+        "Height": 1004,
+        "WindowState": 0
+      },
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Spell.cs",
+              "DocumentMoniker": "C:\\Users\\Nihil\\source\\repos\\DemiseAscensionReader\\DemiseAscensionReader\\Spell.cs",
+              "RelativeDocumentMoniker": "DemiseAscensionReader\\Spell.cs",
+              "ToolTip": "C:\\Users\\Nihil\\source\\repos\\DemiseAscensionReader\\DemiseAscensionReader\\Spell.cs",
+              "RelativeToolTip": "DemiseAscensionReader\\Spell.cs",
+              "ViewState": "AgIAABcAAAAAAAAAAAAAADQAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-21T15:39:33.248Z",
+              "EditorCaption": ""
             }
           ]
         }
