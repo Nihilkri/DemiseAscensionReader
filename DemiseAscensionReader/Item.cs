@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DemiseAscensionReader {
 	class Item {
-		public static string[] guilds = new string[] { 
+		public static string[] guildnames = new string[] { 
 			"Art", "War", "Pal", "Nin", "Vil", "Exp", "Thi", "Bar", "Mag", "Sor", "Wlk", "Cle" };
 		public static string[] types = new string[] {};
 
@@ -26,6 +26,31 @@ namespace DemiseAscensionReader {
 		public float[] abil;
 		public short swings;
 		public short suk2;
+
+		public short spellnum;
+		public short spellID;
+		public int charges;
+
+		public int guilds;
+		public short uselvl;
+		public float dmg;
+		public short suk3;
+
+		public short sp1;
+		public short hands;
+		public short type;
+		public short[] res;
+
+		public short[] req;
+		public short[] mod;
+		public short cursed;
+		public short SL;
+		public short CR;
+
+		public float[] dmgmult;
+		public short questitem;
+
+
 		public byte[] buk2;
 		public byte[] buk3;
 		public byte[] buk4;

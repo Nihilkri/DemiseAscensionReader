@@ -648,9 +648,37 @@ namespace DemiseAscensionReader {
 					items[item].abil[i] = ReadFloat();
 				items[item].swings = ReadShort();
 				items[item].suk2 = ReadShort();
-				items[item].buk2 = ReadBytes(20);
-				items[item].buk3 = ReadBytes(100);
-				items[item].buk4 = ReadBytes(98);
+				items[item].spellnum = ReadShort();
+				items[item].spellID = ReadShort();
+				items[item].charges = ReadInt();
+				items[item].guilds = ReadInt();
+				items[item].uselvl = ReadShort();
+				items[item].dmg = ReadFloat();
+				items[item].suk3 = ReadShort();
+
+				items[item].sp1 = ReadShort();
+				items[item].hands = ReadShort();
+				items[item].type = ReadShort();
+				items[item].res = new short[12];
+				for(int i = 0; i < items[item].res.Length; i++)
+					items[item].res[i] = ReadShort();
+
+				items[item].req = new short[7];
+				for(int i = 0; i < items[item].req.Length; i++)
+					items[item].req[i] = ReadShort();
+				items[item].mod = new short[7];
+				for(int i = 0; i < items[item].mod.Length; i++)
+					items[item].mod[i] = ReadShort();
+				items[item].cursed = ReadShort();
+				items[item].SL = ReadShort();
+				items[item].CR = ReadShort();
+
+				items[item].dmgmult = new float[21];
+				for(int i = 0; i < items[item].dmgmult.Length; i++)
+					items[item].dmgmult[i] = ReadFloat();
+				items[item].questitem = ReadShort();
+
+				items[item].buk4 = ReadBytes(48);
 			}
 			MessageBox.Show("Items loaded! Printing the items!");
 			ShowItems(0, 0); nomouse = false;
@@ -674,15 +702,46 @@ namespace DemiseAscensionReader {
 						"Swng", "suk2");
 					break;
 				case 1:
-					fmt = "{0,3} {1,30} {2,40}\n";
-					s = String.Format(fmt, "Num", "Name", "Unknown2");
+					fmt = "{0,3} {1,30} " +
+						"{2,8} {3,7} {4,21} " +
+						"{5,7} {6,48} {7,6} {8,8} {9,4}" +
+						"{10,3} {11,5} {12,4} " +
+						"{13,3} {14,3} {15,3} {16,3} {17,3} {18,3} " +
+						"{19,3} {20,3} {21,3} {22,3} {23,3} {24,3} " +
+						"\n";
+					s = String.Format(fmt, "Num", "Name",
+						"SpellNum", "SpellID", "SpellName",
+						"Charges", "Guilds", "Uselvl", "Dmg", "suk3",
+						"sp1", "hands", "type",
+						"Fir", "Col", "Ele", "Min", "Dis", "Poi",
+						"Mag", "Sto", "Par", "Dra", "Aci", "Age");
 					break;
 				case 2:
-					fmt = "{0,3} {1,30} {2,200}\n";
-					s = String.Format(fmt, "Num", "Name", "Unknown3");
+					fmt = "{0,3} {1,30} " +
+						"{02,3}{03,2} {04,3}{05,2} " +
+						"{06,3}{07,2} {08,3}{09,2} " +
+						"{10,3}{11,-3} {12,3}{13,2}" +
+						"{14,2}{15,2} " +
+						"{16,6} {17,3} {18,2} {19,12} " +
+						"{20,3} {21,3} {22,3} {23,3} {24,3} " +
+						"{25,3} {26,3} {27,3} {28,3} {29,3} " +
+						"{30,3} {31,3} {32,3} {33,3} {34,3} " +
+						"{35,3} {36,3} {37,3} {38,3} {39,3} " +
+						"{40,5} \n";
+					s = String.Format(fmt, "Num", "Name",
+						"Str", "  ", "Int", "  ",
+						"Wis", "  ", "Con", "  ",
+						"Cha", "   ", "Dex", "  ",
+						"-", "",
+						"Cursed", "SL", "CR", "DmgMult: Hum",
+						"Sli", "Dem", "Dev", "Ele", "Rep",
+						"Dra", "Ani", "Ins", "Und", "Wat",
+						"Gia", "Myt", "Lyc", "Thi", "Mag",
+						"War", "Ind", "f18", "f19", "f20",
+						"Quest");
 					break;
 				case 3:
-					fmt = "{0,3} {1,30} {2,198}\n";
+					fmt = "{0,3} {1,30} {2,96}\n";
 					s = String.Format(fmt, "Num", "Name", "Unknown4");
 					break;
 
@@ -703,12 +762,55 @@ namespace DemiseAscensionReader {
 							item.swings, item.suk2);
 						break;
 					case 1:
+						string gs = "";
+						for(int i = 0; i < 12; i++) {
+							gs += (((item.guilds & (1 << i)) != 0) ? Item.guildnames[i] : "   ") + " ";
+						}
 						s += String.Format(fmt,
-							num, item.name, HexStr(item.buk2));
+							num, item.name, 
+							item.spellnum, item.spellID,
+							(item.spellID == -1 ? "" :
+								((spells is null) ? "No Spells Loaded" :
+									spells[item.spellnum].name)), 
+							item.charges, gs, item.uselvl, item.dmg, item.suk3,
+							item.sp1, item.hands, item.type,
+							item.res[0], item.res[1], item.res[2], item.res[3], item.res[4], item.res[5],
+							item.res[6], item.res[7], item.res[8], item.res[9], item.res[10], item.res[11]
+							);
 						break;
 					case 2:
 						s += String.Format(fmt,
-							num, item.name, HexStr(item.buk3));
+							num, item.name,
+							item.req[0], (item.mod[0] == 0 ? "  " : (item.mod[0] > 0 ? "+" : "") + item.mod[0]),
+							item.req[1], (item.mod[1] == 0 ? "  " : (item.mod[1] > 0 ? "+" : "") + item.mod[1]),
+							item.req[2], (item.mod[2] == 0 ? "  " : (item.mod[2] > 0 ? "+" : "") + item.mod[2]),
+							item.req[3], (item.mod[3] == 0 ? "  " : (item.mod[3] > 0 ? "+" : "") + item.mod[3]),
+							item.req[4], (item.mod[4] == 0 ? "  " : (item.mod[4] > 0 ? "+" : "") + item.mod[4]),
+							item.req[5], (item.mod[5] == 0 ? "  " : (item.mod[5] > 0 ? "+" : "") + item.mod[5]),
+							item.req[6], (item.mod[6] == 0 ? "  " : (item.mod[6] > 0 ? "+" : "") + item.mod[6]),
+							item.cursed, item.SL, item.CR,
+							item.dmgmult[00] == 1.0 ? "_" : "" + item.dmgmult[00],
+							item.dmgmult[01] == 1.0 ? "_" : "" + item.dmgmult[01],
+							item.dmgmult[02] == 1.0 ? "_" : "" + item.dmgmult[02],
+							item.dmgmult[03] == 1.0 ? "_" : "" + item.dmgmult[03],
+							item.dmgmult[04] == 1.0 ? "_" : "" + item.dmgmult[04],
+							item.dmgmult[05] == 1.0 ? "_" : "" + item.dmgmult[05],
+							item.dmgmult[06] == 1.0 ? "_" : "" + item.dmgmult[06],
+							item.dmgmult[07] == 1.0 ? "_" : "" + item.dmgmult[07],
+							item.dmgmult[08] == 1.0 ? "_" : "" + item.dmgmult[08],
+							item.dmgmult[09] == 1.0 ? "_" : "" + item.dmgmult[09],
+							item.dmgmult[10] == 1.0 ? "_" : "" + item.dmgmult[10],
+							item.dmgmult[11] == 1.0 ? "_" : "" + item.dmgmult[11],
+							item.dmgmult[12] == 1.0 ? "_" : "" + item.dmgmult[12],
+							item.dmgmult[13] == 1.0 ? "_" : "" + item.dmgmult[13],
+							item.dmgmult[14] == 1.0 ? "_" : "" + item.dmgmult[14],
+							item.dmgmult[15] == 1.0 ? "_" : "" + item.dmgmult[15],
+							item.dmgmult[16] == 1.0 ? "_" : "" + item.dmgmult[16],
+							item.dmgmult[17] == 1.0 ? "_" : "" + item.dmgmult[17],
+							item.dmgmult[18] == 1.0 ? "_" : "" + item.dmgmult[18],
+							item.dmgmult[19] == 1.0 ? "_" : "" + item.dmgmult[19],
+							item.dmgmult[20] == 1.0 ? "_" : "" + item.dmgmult[20],
+							item.questitem);
 						break;
 					case 3:
 						s += String.Format(fmt,
@@ -771,7 +873,7 @@ namespace DemiseAscensionReader {
 				spells[spell].suk7 = ReadShort();
 				spells[spell].sp4 = ReadBytes(12);
 			}
-			spells = spells.OrderBy(x => x.type).ToArray();
+			//spells = spells.OrderBy(x => x.type).ToArray();
 			MessageBox.Show("Spells loaded! Printing the spells!");
 			ShowSpells(0, 0); nomouse = false;
 
