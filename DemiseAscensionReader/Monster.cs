@@ -8,6 +8,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 namespace DemiseAscensionReader {
 	class Monster {
+		public static string sorted = "";
 		public static string[] types = new string[] {
 			"Humanoid", "Slime", "Demon", "Devil", "Elemental", "Reptile", "Dragon", "Animal", "Insect",
 			"Undead", "Water", "Giant", "Mythical", "Lycanthrope", "Thief", "Mage", "Warrior", "Indigni"};
@@ -16,7 +17,7 @@ namespace DemiseAscensionReader {
 		public static short huk1;
 		public static short huk2;
 
-
+		public short num;
 		public short namelen1, namelen2;
 		public string name;
 		public short att, def;
@@ -33,5 +34,7 @@ namespace DemiseAscensionReader {
 		public short type;
 		public string uk3;
 		public string uk4;
+		public byte size;
+		public string uk5;
 	}
 }

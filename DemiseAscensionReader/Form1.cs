@@ -31,10 +31,10 @@ namespace DemiseAscensionReader {
 		#region Files
 		string fyl = "", dir = "", mode = ""; byte[] dat; int pos = 0;
 		System.IO.FileStream io; bool changed = false;
-		Dungeon map; int lv; Dungeon.Sqr csq; Dungeon.Grp cgp;
-		Monster[] mons; int page = 0; Monster cmon;
-		Item[] items; Item citem;
-		Spell[] spells; Spell cspell;
+		Dungeon map; int lv; Dungeon.Sqr csq; Dungeon.Grp cgp; Info[] mapinfo;
+		Monster[] mons; int page = 0; Monster cmon; Info[] moninfo;
+		Item[] items; Item citem; Info[] iteminfo;
+		Spell[] spells; Spell cspell; Info[] spellinfo;
 		int hexwidth = 0x40, hexheight = 0x50;
 	#endregion Files
 
@@ -150,15 +150,36 @@ namespace DemiseAscensionReader {
 					x = e.X / 11; y = 89-(e.Y-34)/11; 
 					if(x < 0 || y < 0 || x > 89 || y > 89) return;
 					csq = map.lvs[lv].sq[x, y]; cgp = map.gps[csq.g];
-					gf.FillRectangle(Brushes.Black, 0, 0, 990, 24);
+					//gf.FillRectangle(Brushes.Black, 0, 0, 990, 24);
+					gf.FillRectangle(Brushes.Black, 1032, 22, 888, 1058);
 
-					gf.DrawString("XYZ: (" + (x+1) + "," + (y+1) + "," + (lv+1) + "); TE: " + csq.te + "; TW: " + csq.tw + "; TN: " + csq.tn + "; TS: " + csq.ts + 
-						"; TF: " + csq.tf + "; TC: " + csq.tc + "; M: " + csq.m + "; G: " + csq.g + "; R: " + csq.r, Font, Brushes.White, 0, 0);
-					gf.DrawString("Types: " + cgp.type.ToString("X8") + "; GID: " + cgp.id + "; LF: " + cgp.lf + "; LM: " + cgp.lm + "; GF: " + cgp.gf + 
-						"; SM: " + cgp.sm + "; MV: " + cgp.mv + "; T: " + cgp.t + "; R: " + cgp.r + "; S: " + cgp.s + "; UK: " + HexStr(cgp.uk) + "; SQ: " + cgp.sq
-
-
-						, Font, Brushes.White, 0, 10);
+					gf.DrawString(
+						"mXY: (" + e.X + ", " + e.Y + ")" +
+						"\nXYZ: (" + (x+1) + "," + (y+1) + "," + (lv+1) + ")" +
+						"\nTE: " + csq.te +
+						"\nTW: " + csq.tw +
+						"\nTN: " + csq.tn +
+						"\nTS: " + csq.ts +
+						"\nTF: " + csq.tf +
+						"\nTC: " + csq.tc +
+						"\nM: " + csq.m +
+						"\nG: " + csq.g +
+						"\nR: " + csq.r
+						, Font, Brushes.White, 1050, 40);
+					gf.DrawString(
+						"Types: " + cgp.type.ToString("X8") +
+						"\nGID: " + cgp.id +
+						"\nLF: " + cgp.lf +
+						"\nLM: " + cgp.lm +
+						"\nGF: " + cgp.gf +
+						"\nSM: " + cgp.sm +
+						"\nMV: " + cgp.mv +
+						"\nT: " + cgp.t +
+						"\nR: " + cgp.r +
+						"\nS: " + cgp.s +
+						"\nUK: " + HexStr(cgp.uk) +
+						"\nSQ: " + cgp.sq
+						, Font, Brushes.White, 1050, 540  );
 					//gf.DrawString(
 					//	"00        01        02        03        04        " +
 					//	"05        06        07        08        09        " +
@@ -211,6 +232,22 @@ namespace DemiseAscensionReader {
 		}
 		public void CloseFyl(bool c = true) {
 			if(fyl == "") return; nomouse = true;
+			switch(mode) {
+				case "DEMISEMonsters":
+					if(Monster.sorted != "num") { Monster.sorted = "num";
+						mons = mons.OrderBy(x => x.num).ToArray();
+					}
+					break;
+				case "DEMISEItems":
+					if(Item.sorted != "num") { Item.sorted = "num";
+						items = items.OrderBy(x => x.num).ToArray();
+					}
+					break;
+				case "DEMISESpells":
+					if(Spell.sorted != "num") { Spell.sorted = "num";
+						spells = spells.OrderBy(x => x.num).ToArray();
+					} break;
+			}
 			if(changed || !c) {
 				io.Position = 0; if(dat.Length != io.Length) { MessageBox.Show("File length changed!"); } else { if(!c)Crypt(); io.Write(dat, 0, dat.Length); }
 			} else MessageBox.Show(fyl + " not changed!");
@@ -320,7 +357,7 @@ namespace DemiseAscensionReader {
 				}
 
 			}
-			MessageBox.Show("Door? " + map.lvs[0].sq[3, 0].te);
+			//MessageBox.Show("Door? " + map.lvs[0].sq[3, 0].te);
 			MessageBox.Show("Map loaded! Drawing the map!"); 
 			//MessageBox.Show(map.xm + "\n" + map.ym + "\n" + map.gm + "\n" + map.offset[0] + "\n" + map.offset[1] + "\n" + map.offset[2]);
 			DrawMap(0); nomouse = false;
@@ -331,7 +368,8 @@ namespace DemiseAscensionReader {
 			int em=0, wm=0, nm=0, sm=0, cm=0, fm=0;
 			for(int x = 0 ; x < map.lvs[lv].sqx ; x++) {
 				for(int y = 0 ; y < map.lvs[lv].sqy ; y++) {
-					x1 = x * 11; x2 = x1 + 10; y1 = 34 + ((89 - y) * 11); y2 = y1 + 10; csq = map.lvs[lv].sq[x, y]; cgp = map.gps[csq.g];
+					x1 = x * 11; x2 = x1 + 10; y1 = 34 + ((89 - y) * 11); y2 = y1 + 10;
+					csq = map.lvs[lv].sq[x, y]; cgp = map.gps[csq.g];
 
 					// Floor
 					if(csq.tf == 0) {
@@ -407,20 +445,21 @@ namespace DemiseAscensionReader {
 				}
 			}
 			//MessageBox.Show(em + ", " + wm + ", " + nm + ", " + sm);
-			gb.DrawString(em + ", " + wm + ", " + nm + ", " + sm, Font, Brushes.Black, 990, 0);
+			gb.DrawString(em + ", " + wm + ", " + nm + ", " + sm, Font, Brushes.Black, 1032, 0);
 			//gb.DrawString("uk: " + HexStr(map.lvs[lv].uk) + "    uk2: " + HexStr(map.lvs[lv].uk2),
 			gb.DrawString(
 				"sqx: " + map.lvs[lv].sqx +
 				" sqy: " + map.lvs[lv].sqx +
 				" l: " + map.lvs[lv].l +
 				" g: " + map.lvs[lv].g,
-				Font, Brushes.Black, 0, 22);
+				Font, Brushes.Black, 1032, 11);
 
 			for(int q = 0 ; q < 45 ; q++) {
-				gb.DrawString("Lv " + (q + 1), Font, (q == lv) ? Brushes.White : Brushes.Black, 990, q * 21 + 5 + 34);
-				gb.DrawLine(Pens.Black, 990, q * 21 + 34, 1024, q * 21 + 34);
+				gb.DrawString("Lv " + (q < 9 ? "0" : "") + (q + 1), Font,
+					(q == lv) ? Brushes.White : Brushes.Black, 990, q * 21 + 5 + 34);
+				gb.DrawLine(Pens.Black, 990, q * 21 + 34, 1032, q * 21 + 34);
 			}
-			gb.DrawLine(Pens.Black, 1024, 34, 1024, 1024);
+			gb.DrawLine(Pens.Black, 1032, 34, 1032, 1024);
 
 
 			gf.DrawImage(gi, 0, 0);
@@ -429,14 +468,16 @@ namespace DemiseAscensionReader {
 		#endregion Dungeon
 		#region Monsters
 		public void LoadMonsters() {
+			int maxinfo = -1;
 			ByteConverter bc = new ByteConverter(); pos = 0;
 			Monster.header = HexStr(ReadBytes(18));
 			Monster.huk1 = ReadShort();
 			Monster.huk2 = ReadShort();
 			Monster.nummon = ReadShort(); // Max number of monsters
 			mons = new Monster[Monster.nummon];
-			for(int mon = 0; mon < Monster.nummon; mon++) {
+			for(short mon = 0; mon < Monster.nummon; mon++) {
 				mons[mon] = new Monster();
+				mons[mon].num = mon;
 				mons[mon].namelen1 = ReadShort();
 				mons[mon].namelen2 = ReadShort();
 				mons[mon].name = ReadString(mons[mon].namelen1);
@@ -458,9 +499,13 @@ namespace DemiseAscensionReader {
 				for(int i = 0; i < 7; i++) mons[mon].stats[i] = ReadShort();
 				mons[mon].type = ReadShort();
 				mons[mon].uk3 = HexStr(ReadBytes(10));
-				mons[mon].uk4 = HexStr(ReadBytes(100));
+				mons[mon].uk4 = HexStr(ReadBytes(26));
+				mons[mon].size = ReadByte();
+				mons[mon].uk5 = HexStr(ReadBytes(73));
 			}
 
+			Monster.sorted = "num";
+			//mons = mons.OrderBy(x => x.ukb).ToArray();
 			MessageBox.Show("Monsters loaded! Printing the monsters!");
 			ShowMonsters(0, 0); nomouse = false;
 
@@ -511,8 +556,8 @@ namespace DemiseAscensionReader {
 					s = String.Format(fmt, "Num", "Name", "Unknown2", "Unknown3");
 					break;
 				case 4:
-					fmt = "{0,3} {1,24} {2,200}\n";
-					s = String.Format(fmt, "Num", "Name", "Unknown4");
+					fmt = "{0,3} {1,24} {2,52} {3,4} {4,146}\n";
+					s = String.Format(fmt, "Num", "Name", "Unknown4", "Size", "Unknown5");
 					break;
 				default:
 					fmt = ""; s = "";
@@ -564,7 +609,7 @@ namespace DemiseAscensionReader {
 						break;
 					case 4:
 						s += String.Format(fmt,
-							num, mon.name, mon.uk4);
+							num, mon.name, mon.uk4, mon.size, mon.uk5);
 						break;
 					default:
 						break;
@@ -626,14 +671,18 @@ namespace DemiseAscensionReader {
 		#endregion Monsters
 		#region Items
 		public void LoadItems() {
+			int maxinfo = -1;
 			ByteConverter bc = new ByteConverter(); pos = 0;
 			Item.header = ReadBytes(18);
+			MessageBox.Show("Header = " + HexStr(Item.header));
 			Item.huk1 = ReadShort();
 			Item.huk2 = ReadShort();
+			MessageBox.Show("huk1 = " + Item.huk1 + ", huk2 = " + Item.huk2);
 			Item.numitems = ReadShort(); // Max number of items
 			items = new Item[Item.numitems];
-			for(int item = 0; item < Item.numitems; item++) {
+			for(short item = 0; item < Item.numitems; item++) {
 				items[item] = new Item();
+				items[item].num = item;
 				items[item].namelen1 = ReadShort();
 				items[item].namelen2 = ReadShort();
 				items[item].name = ReadString(items[item].namelen1);
@@ -678,11 +727,14 @@ namespace DemiseAscensionReader {
 					items[item].dmgmult[i] = ReadFloat();
 				items[item].questitem = ReadShort();
 
-				items[item].buk4 = ReadBytes(48);
+				items[item].infoindex = ReadShort();
+				if(items[item].infoindex > maxinfo)
+					maxinfo = items[item].infoindex;
+				items[item].buk4 = ReadBytes(46);
 			}
-			if(!(spells is null))
-				spells = spells.OrderBy(x => x.num).ToArray();
-
+			if(iteminfo is null) iteminfo = new Info[maxinfo];
+			Item.sorted = "infoindex";
+			items = items.OrderBy(x => x.infoindex).ToArray();
 			MessageBox.Show("Items loaded! Printing the items!");
 			ShowItems(0, 0); nomouse = false;
 
@@ -693,12 +745,12 @@ namespace DemiseAscensionReader {
 			gb.Clear(Color.Black); Item item; int num; String fmt = "", s = "";
 			switch(page) {
 				case 0:
-					fmt = "{0,3} {1,30} {2,5} {3,4}/{4,4} " +
-						"{5,8} {6,3} {7,4} " +
-						"{8,4} {9,4} {10,4} {11,4} {12,4} {13,4} {14,4} {15,4} " +
-						"{16,4} {17,4} {18,4} {19,4} {20,4} {21,4} {22,4} {23,4} {24,4} " +
-						"{25,4} {26,4} \n";
-					s = String.Format(fmt, "Num", "Name", "ItemID", "Att", "Def",
+					fmt = "{0,3} {1,30} {2,3} {3,3} {4,4}/{5,4} " +
+						"{6,8} {7,3} {8,4} " +
+						"{9,4} {10,4} {11,4} {12,4} {13,4} {14,4} {15,4} {16,4} " +
+						"{17,4} {18,4} {19,4} {20,4} {21,4} {22,4} {23,4} {24,4} {25,4} " +
+						"{26,4} {27,4} \n";
+					s = String.Format(fmt, "  #", "Name", "Num", "ID", "Att", "Def",
 						"Value", "Lvl", "suk1",
 						"Levi", "Invs", "Prot", "SeeI", "Crit", "Stab", "Burn", "Frez",
 						"Pois", "    ", "Elec", "Ston", "Dcap", "HPrg", "SPrg", "Spel", "    ",
@@ -712,7 +764,7 @@ namespace DemiseAscensionReader {
 						"{13,3} {14,3} {15,3} {16,3} {17,3} {18,3} " +
 						"{19,3} {20,3} {21,3} {22,3} {23,3} {24,3} " +
 						"\n";
-					s = String.Format(fmt, "Num", "Name",
+					s = String.Format(fmt, "  #", "Name",
 						"SpellNum", "SpellID", "SpellName",
 						"Charges", "Guilds", "Uselvl", "Dmg", "suk3",
 						"sp1", "hands", "type",
@@ -731,7 +783,7 @@ namespace DemiseAscensionReader {
 						"{30,3} {31,3} {32,3} {33,3} {34,3} " +
 						"{35,3} {36,3} {37,3} {38,3} {39,3} " +
 						"{40,5} \n";
-					s = String.Format(fmt, "Num", "Name",
+					s = String.Format(fmt, "  #", "Name",
 						"Str", "  ", "Int", "  ",
 						"Wis", "  ", "Con", "  ",
 						"Cha", "   ", "Dex", "  ",
@@ -744,8 +796,8 @@ namespace DemiseAscensionReader {
 						"Quest");
 					break;
 				case 3:
-					fmt = "{0,3} {1,30} {2,96}\n";
-					s = String.Format(fmt, "Num", "Name", "Unknown4");
+					fmt = "{0,3} {1,30} {2,4} {3,92}\n";
+					s = String.Format(fmt, "  #", "Name", "Info", "Unknown4");
 					break;
 
 				default:
@@ -756,7 +808,7 @@ namespace DemiseAscensionReader {
 				switch(page) {
 					case 0:
 						s += String.Format(fmt,
-							num, item.name, item.itemid, item.att, item.def, item.buk1, item.findlvl, 
+							num, item.name, item.num, item.itemid, item.att, item.def, item.buk1, item.findlvl, 
 							item.suk1,
 							item.abil[00], item.abil[01], item.abil[02], item.abil[03],
 							item.abil[04], item.abil[05], item.abil[06], item.abil[07],
@@ -817,7 +869,7 @@ namespace DemiseAscensionReader {
 						break;
 					case 3:
 						s += String.Format(fmt,
-							num, item.name, HexStr(item.buk4));
+							num, item.name, item.infoindex, HexStr(item.buk4));
 						break;
 					default:
 						break;
@@ -831,6 +883,7 @@ namespace DemiseAscensionReader {
 		#endregion Items
 		#region Spells
 		public void LoadSpells() {
+			int maxinfo = -1;
 			ByteConverter bc = new ByteConverter(); pos = 0;
 			Spell.header = ReadBytes(18);
 			Spell.huk1 = ReadShort();
@@ -876,6 +929,7 @@ namespace DemiseAscensionReader {
 				spells[spell].suk7 = ReadShort();
 				spells[spell].sp4 = ReadBytes(12);
 			}
+			Spell.sorted = "type";
 			spells = spells.OrderBy(x => x.type).ToArray();
 			MessageBox.Show("Spells loaded! Printing the spells!");
 			ShowSpells(0, 0); nomouse = false;
@@ -963,7 +1017,8 @@ namespace DemiseAscensionReader {
 		#region Unknown
 		public void ShowHex(int nv) {
 			lv = nv; // if(lv < 0) lv = 0;
-			if(lv < 0 || lv > dat.Length) lv = (int)(dat.Length / (hexwidth * hexheight));
+			if(lv < 0 || lv > dat.Length - (hexwidth * hexheight))
+				lv = (int)(dat.Length - (hexwidth * hexheight));
 			gb.Clear(Color.Black);
 			String str = "";
 			byte v = 0;

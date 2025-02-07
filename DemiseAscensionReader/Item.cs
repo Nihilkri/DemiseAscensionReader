@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DemiseAscensionReader {
 	class Item {
+		public static string sorted = "";
 		public static string[] guildnames = new string[] { 
 			"Art", "War", "Pal", "Nin", "Vil", "Exp", "Thi", "Bar", "Mag", "Sor", "Wlk", "Cle" };
 		public static string[] types = new string[] {};
@@ -15,7 +17,7 @@ namespace DemiseAscensionReader {
 		public static short huk1;
 		public static short huk2;
 
-
+		public short num;
 		public short namelen1, namelen2;
 		public string name;
 		public short itemid;
@@ -50,11 +52,18 @@ namespace DemiseAscensionReader {
 		public float[] dmgmult;
 		public short questitem;
 
+		public short infoindex;
 
-		public byte[] buk2;
-		public byte[] buk3;
+
+
 		public byte[] buk4;
 
 
+	}
+	class Info {
+		public static byte[] header;
+		public int loc;
+		public short infolen;
+		public string info;
 	}
 }

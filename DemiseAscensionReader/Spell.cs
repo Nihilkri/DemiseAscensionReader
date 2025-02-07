@@ -10,6 +10,7 @@ using System.Xml.Linq;
 
 namespace DemiseAscensionReader {
 	class Spell {
+		public static string sorted = "";
 		public static string[] types = new string[] {
 			"Fire", "Cold", "Electrical", "Mind", "Damage",
 			"Element", "Kill", "Charm", "Bind", "Heal",
