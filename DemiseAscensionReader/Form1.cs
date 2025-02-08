@@ -733,8 +733,8 @@ namespace DemiseAscensionReader {
 				items[item].buk4 = ReadBytes(46);
 			}
 			if(iteminfo is null) iteminfo = new Info[maxinfo];
-			Item.sorted = "infoindex";
-			items = items.OrderBy(x => x.infoindex).ToArray();
+			Item.sorted = "num";
+			//items = items.OrderBy(x => x.dmg).ToArray();
 			MessageBox.Show("Items loaded! Printing the items!");
 			ShowItems(0, 0); nomouse = false;
 
@@ -760,14 +760,14 @@ namespace DemiseAscensionReader {
 					fmt = "{0,3} {1,30} " +
 						"{2,8} {3,7} {4,21} " +
 						"{5,7} {6,48} {7,6} {8,8} {9,4}" +
-						"{10,3} {11,5} {12,4} " +
+						"{10,3} {11,5} {12,13} " +
 						"{13,3} {14,3} {15,3} {16,3} {17,3} {18,3} " +
 						"{19,3} {20,3} {21,3} {22,3} {23,3} {24,3} " +
 						"\n";
 					s = String.Format(fmt, "  #", "Name",
 						"SpellNum", "SpellID", "SpellName",
 						"Charges", "Guilds", "Uselvl", "Dmg", "suk3",
-						"sp1", "hands", "type",
+						"sp1", "Hands", "Type",
 						"Fir", "Col", "Ele", "Min", "Dis", "Poi",
 						"Mag", "Sto", "Par", "Dra", "Aci", "Age");
 					break;
@@ -828,7 +828,7 @@ namespace DemiseAscensionReader {
 								((spells is null) ? "No Spells Loaded" :
 									spells[item.spellnum].name)), 
 							item.charges, gs, item.uselvl, item.dmg, item.suk3,
-							item.sp1, item.hands, item.type,
+							item.sp1, item.hands, Item.types[item.type],
 							item.res[0], item.res[1], item.res[2], item.res[3], item.res[4], item.res[5],
 							item.res[6], item.res[7], item.res[8], item.res[9], item.res[10], item.res[11]
 							);

@@ -10,7 +10,15 @@ namespace DemiseAscensionReader {
 		public static string sorted = "";
 		public static string[] guildnames = new string[] { 
 			"Art", "War", "Pal", "Nin", "Vil", "Exp", "Thi", "Bar", "Mag", "Sor", "Wlk", "Cle" };
-		public static string[] types = new string[] {};
+		public static string[] types = new string[] {
+			"Te-Waza", "Dagger", "Cross", "Sword", "Staff",
+			"Mace", "Axe", "Hammer", "Leather Armor", 
+			"Chain Armor", "Plate Armor", "Shield", "Cap", "Helmet",
+			"Gloves", "Gauntlets", "Cloak", "Bracers", "Sash", 
+			"Belt", "Boots", "Ring", "Amulet", "Potion", 
+			"Scroll", "Tome", "Dust", "Crystal", "Rod", 
+			"Stone", "Sphere", "Cube", "Artifact", "Miscellaneous", 
+			"Guild Crest", "Treatise"};
 
 		public static byte[] header;
 		public static short numitems;
