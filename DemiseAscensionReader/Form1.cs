@@ -227,6 +227,10 @@ namespace DemiseAscensionReader {
 				case "DEMISEMonsters": MessageBox.Show("Loading the monsters!"); LoadMonsters(); break;
 				case "DEMISEItems": MessageBox.Show("Loading the items!"); LoadItems(); break;
 				case "DEMISESpells": MessageBox.Show("Loading the spells!"); LoadSpells(); break;
+				case "DEMISEInfoSpell": if(spellinfo is null) {
+						MessageBox.Show("Spells not found! Load Spells first!");
+						mode += "hex"; ShowHex(0); break; } mode = "DEMISESpells";
+					MessageBox.Show("Loading the spell info!"); LoadSpellInfo(); break;
 				default: MessageBox.Show(mode); ShowHex(0); break;
 			}
 		}
@@ -503,7 +507,7 @@ namespace DemiseAscensionReader {
 				mons[mon].size = ReadByte();
 				mons[mon].uk5 = HexStr(ReadBytes(73));
 			}
-
+			//if(moninfo is null) moninfo = new Info[maxinfo];
 			Monster.sorted = "num";
 			//mons = mons.OrderBy(x => x.ukb).ToArray();
 			MessageBox.Show("Monsters loaded! Printing the monsters!");
@@ -915,7 +919,9 @@ namespace DemiseAscensionReader {
 				spells[spell].reqdex = ReadShort();
 				spells[spell].suk4 = ReadShort();
 				spells[spell].resist = ReadShort();
-				spells[spell].suk5 = ReadShort();
+				spells[spell].infoindex = ReadShort();
+				if(spells[spell].infoindex > maxinfo)
+					maxinfo = spells[spell].infoindex;
 				spells[spell].suk6 = ReadShort();
 				spells[spell].sp1 = ReadBytes(6);
 				spells[spell].OL = new short[12];
@@ -929,11 +935,29 @@ namespace DemiseAscensionReader {
 				spells[spell].suk7 = ReadShort();
 				spells[spell].sp4 = ReadBytes(12);
 			}
+			if(spellinfo is null) spellinfo = new Info[maxinfo + 1];
 			Spell.sorted = "type";
 			spells = spells.OrderBy(x => x.type).ToArray();
 			MessageBox.Show("Spells loaded! Printing the spells!");
 			ShowSpells(0, 0); nomouse = false;
 
+		}
+		public void LoadSpellInfo() {
+			int maxinfo = -1;
+			ByteConverter bc = new ByteConverter(); pos = 0;
+			Info.header = ReadBytes(14);
+			for(int info = 0; info < spellinfo.Length; info++) {
+				spellinfo[info] = new Info();
+				spellinfo[info].loc = ReadInt();
+			}
+			for(int info = 0; info < spellinfo.Length; info++) {
+				spellinfo[info].infolen = ReadShort();
+				if(spellinfo[info].infolen > maxinfo) maxinfo = spellinfo[info].infolen;
+				spellinfo[info].info = ReadString(spellinfo[info].infolen);
+			}
+			MessageBox.Show("The longest spell info is " + maxinfo + " long!");
+			MessageBox.Show("Spell Infos loaded! Printing the spells!");
+			ShowSpells(0, 0); nomouse = false;
 		}
 		public void ShowSpells(int nv, int np) {
 			lv = (nv + Spell.numspells) % Spell.numspells;
@@ -963,12 +987,16 @@ namespace DemiseAscensionReader {
 						"Thi", "Bar", "Mag", "Sor", "Wlk", "Cle");
 					break;
 				case 2:
-					fmt = "{0,3} {1,30} {2,4} {3,4} " +
-						"{4,4} {5,4} {6,4} {7,4} {8,4} \n";
-					s = String.Format(fmt, "  #", "Name", "suk1", "suk2",
-						"suk3", "suk4", "suk5", "suk6", "suk7");
+					fmt = "{0,3} {1,30} {2,4} {3,-466} \n";
+					s = String.Format(fmt, "  #", "Name", "Info", "Informational Text");
 					break;
 				case 3:
+					fmt = "{0,3} {1,30} {2,4} {3,4} " +
+						"{4,4} {5,4} {6,4} {7,4} \n";
+					s = String.Format(fmt, "  #", "Name", "suk1", "suk2",
+						"suk3", "suk4", "suk6", "suk7");
+					break;
+				case 4:
 					fmt = "{0,3} {1,30} {2,12} {3,16} {4,16} {5,24} \n";
 					s = String.Format(fmt, "  #", "Name", "sp1", "sp2", "sp3", "sp4");
 					break;
@@ -995,10 +1023,15 @@ namespace DemiseAscensionReader {
 						break;
 					case 2:
 						s += String.Format(fmt,
-							num, spell.name, spell.suk1, spell.suk2,
-							spell.suk3, spell.suk4, spell.suk5, spell.suk6, spell.suk7);
+							num, spell.name, spell.infoindex,
+							(spellinfo[spell.infoindex] is null ? "No Info Loaded" : spellinfo[spell.infoindex].info));
 						break;
 					case 3:
+						s += String.Format(fmt,
+							num, spell.name, spell.suk1, spell.suk2,
+							spell.suk3, spell.suk4, spell.suk6, spell.suk7);
+						break;
+					case 4:
 						s += String.Format(fmt,
 							num, spell.name, HexStr(spell.sp1), HexStr(spell.sp2),
 							HexStr(spell.sp3), HexStr(spell.sp4));

@@ -44,7 +44,7 @@ namespace DemiseAscensionReader {
 		public short reqdex;
 		public short suk4;
 		public short resist;
-		public short suk5;
+		public short infoindex;
 		public short suk6;
 		public byte[] sp1; // 8 bytes
 		public short[] OL;
