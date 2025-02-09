@@ -943,7 +943,7 @@ namespace DemiseAscensionReader {
 
 		}
 		public void LoadSpellInfo() {
-			int maxinfo = -1;
+			int maxinfo = -1, maxnum = -1, maxinfospell = -1;
 			ByteConverter bc = new ByteConverter(); pos = 0;
 			Info.header = ReadBytes(14);
 			for(int info = 0; info < spellinfo.Length; info++) {
@@ -952,10 +952,17 @@ namespace DemiseAscensionReader {
 			}
 			for(int info = 0; info < spellinfo.Length; info++) {
 				spellinfo[info].infolen = ReadShort();
-				if(spellinfo[info].infolen > maxinfo) maxinfo = spellinfo[info].infolen;
+				if(spellinfo[info].infolen > maxinfo) {
+					maxinfo = spellinfo[info].infolen;
+					maxnum = info;
+				}
 				spellinfo[info].info = ReadString(spellinfo[info].infolen);
 			}
-			MessageBox.Show("The longest spell info is " + maxinfo + " long!");
+			for(int spell = 0; spell < spells.Length; spell++) {
+				if(spells[spell].infoindex == maxnum) { maxinfospell = spell; break; }
+			}
+			MessageBox.Show("The longest spell info is " + spells[maxinfospell].name + 
+				" at " + maxinfo + " long!");
 			MessageBox.Show("Spell Infos loaded! Printing the spells!");
 			ShowSpells(0, 0); nomouse = false;
 		}
