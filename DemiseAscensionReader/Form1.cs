@@ -226,8 +226,15 @@ namespace DemiseAscensionReader {
 			if(c) MessageBox.Show("You opened " + fyl + "!");
 			//mode += "Hex";
 			switch(mode) {
-				//case "RevDungeon": mode = "DemiseDungeon"; LoadMap(); break;
-				//case "DEMISEDungeon": MessageBox.Show("Loading the map!"); LoadMap(); break;
+				case "RevDungeon": mode = "DEMISEDungeon"; break;
+				case "RevMonsters": mode = "DEMISEMonsters"; break;
+				case "RevItems": mode = "DEMISEItems"; break;
+				case "RevSpells": mode = "DEMISESpells"; break;
+				case "RevInfoSpell": mode = "DEMISEInfoSpell"; break;
+
+			}
+			switch(mode) {
+				case "DEMISEDungeon": MessageBox.Show("Loading the map!"); LoadMap(); break;
 				case "DEMISEMonsters": MessageBox.Show("Loading the monsters!"); LoadMonsters(); break;
 				case "DEMISEItems": MessageBox.Show("Loading the items!"); LoadItems(); break;
 				case "DEMISESpells": MessageBox.Show("Loading the spells!"); LoadSpells(); break;
@@ -264,9 +271,9 @@ namespace DemiseAscensionReader {
 
 		}
 		byte[] kiiAsc = new byte[] { 0x1E, 0x2E, 0x9D, 0xF4, 0xCE, 0x38, 0xB0, 0xC6 };
-		//byte[] kiiRev = new byte[] { 0xE7, 0xED, 0x4F, 0x43, 0xDf, 0x3D,
-		//	0xEC, 0xE0, 0xEF, 0x88, 0x7E, 0xC9, 0x26 };
-		byte[] kiiRev = new byte[] { 0x00 };
+		byte[] kiiRev = new byte[] { 0xE7, 0xED, 0x4F, 0x43, 0xDf, 0x3D,
+			0xEC, 0xE0, 0xEF, 0x88, 0x7E, 0xC9, 0x26 };
+		//byte[] kiiRev = new byte[] { 0x00 };
 		public void Crypt() {
 			byte[] kii; if(Rev) kii = kiiRev; else kii = kiiAsc;
 			//return;
