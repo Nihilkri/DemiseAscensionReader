@@ -29,6 +29,7 @@ namespace DemiseAscensionReader {
 		public short[] res;
 		public float[] abil;
 		public short[] spells;
+		public float sizef;
 		public string uk2;
 		public short[] stats;
 		public short type;

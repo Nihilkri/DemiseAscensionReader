@@ -62,7 +62,7 @@ namespace DemiseAscensionReader {
 
 		public short infoindex;
 
-
+		public short codexspell;
 
 		public byte[] buk4;
 
