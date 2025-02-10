@@ -29,6 +29,7 @@ namespace DemiseAscensionReader {
 
 		#endregion Graphics
 		#region Files
+		bool Rev = false;
 		string fyl = "", dir = "", mode = ""; byte[] dat; int pos = 0;
 		System.IO.FileStream io; bool changed = false;
 		Dungeon map; int lv; Dungeon.Sqr csq; Dungeon.Grp cgp; Info[] mapinfo;
@@ -209,8 +210,6 @@ namespace DemiseAscensionReader {
 						fyl,System.IO.FileMode.Open,
 						System.IO.FileAccess.ReadWrite);
 					dat = new byte[io.Length]; io.Read(dat, 0, (int)io.Length);
-					if(c) Crypt(); else { MessageBox.Show("You 'crypted " + fyl + "!"); CloseFyl(false);}
-					if(c) MessageBox.Show("You opened " + fyl + "!");
 					break;
 				case System.Windows.Forms.DialogResult.Cancel:
 					cancel = true;
@@ -221,9 +220,14 @@ namespace DemiseAscensionReader {
 			// Datafile selector
 			dir = fyl.Substring(0, fyl.LastIndexOf('\\') + 1);
 			mode = fyl.Substring(fyl.LastIndexOf('\\') + 1, fyl.Length - fyl.LastIndexOf('\\') - 5);
+			Rev = mode.StartsWith("REV", true, System.Globalization.CultureInfo.CurrentCulture);
+			MessageBox.Show("Rev " + Rev);
+			if(c) Crypt(); else { MessageBox.Show("You 'crypted " + fyl + "!"); CloseFyl(false);}
+			if(c) MessageBox.Show("You opened " + fyl + "!");
 			//mode += "Hex";
 			switch(mode) {
-				case "DEMISEDungeon": MessageBox.Show("Loading the map!"); LoadMap(); break;
+				//case "RevDungeon": mode = "DemiseDungeon"; LoadMap(); break;
+				//case "DEMISEDungeon": MessageBox.Show("Loading the map!"); LoadMap(); break;
 				case "DEMISEMonsters": MessageBox.Show("Loading the monsters!"); LoadMonsters(); break;
 				case "DEMISEItems": MessageBox.Show("Loading the items!"); LoadItems(); break;
 				case "DEMISESpells": MessageBox.Show("Loading the spells!"); LoadSpells(); break;
@@ -259,8 +263,12 @@ namespace DemiseAscensionReader {
 			if(c) MessageBox.Show("You closed " + fyl + "!"); fyl = "";
 
 		}
-		byte[] kii = new byte[] { 0x1E, 0x2E, 0x9D, 0xF4, 0xCE, 0x38, 0xB0, 0xC6 };
+		byte[] kiiAsc = new byte[] { 0x1E, 0x2E, 0x9D, 0xF4, 0xCE, 0x38, 0xB0, 0xC6 };
+		//byte[] kiiRev = new byte[] { 0xE7, 0xED, 0x4F, 0x43, 0xDf, 0x3D,
+		//	0xEC, 0xE0, 0xEF, 0x88, 0x7E, 0xC9, 0x26 };
+		byte[] kiiRev = new byte[] { 0x00 };
 		public void Crypt() {
+			byte[] kii; if(Rev) kii = kiiRev; else kii = kiiAsc;
 			//return;
 			if(fyl == "") return;
 			for(int q=0 ; q < dat.Length ; q++) {
