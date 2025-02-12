@@ -167,11 +167,24 @@ namespace DemiseAscensionReader {
 						"\nG: " + csq.g +
 						"\nR: " + csq.r
 						, Font, Brushes.White, 1050, 40);
-					gf.DrawString(
-						"Types: " + cgp.type.ToString("X8") +
+					string laired = cgp.lm.ToString();
+					if(laired == "-1") {
+						laired = "No lair";
+					} else {
+						if(!(mons is null)) {
+							for(int i = 0; i < mons.Length; i++) {
+								if(mons[i].monid == cgp.lm) {
+									laired = mons[i].name; break;
+								}
+							}
+						}
+					}
+							gf.DrawString(
+						//"Types: " + cgp.type.ToString("X8") +
+						"Types: " + abandc(BitList(cgp.type, Monster.types)) +
 						"\nGID: " + cgp.id +
 						"\nLF: " + cgp.lf +
-						"\nLM: " + cgp.lm +
+						"\nLM: " + laired +
 						"\nGF: " + cgp.gf +
 						"\nSM: " + cgp.sm +
 						"\nMV: " + cgp.mv +
@@ -276,7 +289,6 @@ namespace DemiseAscensionReader {
 		//byte[] kiiRev = new byte[] { 0x00 };
 		public void Crypt() {
 			byte[] kii; if(Rev) kii = kiiRev; else kii = kiiAsc;
-			//return;
 			if(fyl == "") return;
 			for(int q=0 ; q < dat.Length ; q++) {
 				dat[q] = (byte)(dat[q] ^ kii[q % kii.Length]);
@@ -312,6 +324,32 @@ namespace DemiseAscensionReader {
 		public string HexStr(byte[] b) {
 			string s = "";
 			for (int i = 0; i < b.Length; i++) { s += b[i].ToString("X2"); }
+			return s;
+		}
+
+		public string[] BitList(int bits, string[] list) {
+			List<string> col = new List<string>();
+			for(int i = 0; i < list.Length; i++) {
+				if ((bits & 1 << i) != 0) col.Add(list[i]);
+			}
+			return col.ToArray();
+		}
+
+		public string abandc(string[] a) {
+			string s = "";
+			switch(a.Length) {
+				case 0:
+					s = ""; break;
+				case 1:
+					s = a[0]; break;
+				case 2:
+					s = a[0] + " and " + a[1]; break;
+				default:
+					for (int i = 0; i < a.Length - 1; i++) {
+						s += a[i] + ", ";
+					} s += "and " + a[a.Length - 1];
+					break;
+			}
 			return s;
 		}
 
@@ -400,11 +438,13 @@ namespace DemiseAscensionReader {
 
 					// Rock?
 					if(csq.r>0) gb.FillRectangle(Brushes.White, x1, y1, 11, 11);
+					// Lava?
+					if(csq.tf == 224) gb.FillRectangle(Brushes.DarkRed, x1, y1, 11, 11);
 
 					//if (cgp.sm > sm) sm = cgp.sm;
 					//if(cgp.sm > 0) gb.FillRectangle(br[cgp.sm-1], x1 + 3, y1 + 3, 7, 7);
 
-					if (true) {
+					if(true) {
 						// Lairs
 						if (cgp.lm != -1) gb.DrawRectangle(Pens.Magenta, x1 + 1, y1 + 1, 9, 9);
 						// Borders between encounter groups
@@ -449,8 +489,7 @@ namespace DemiseAscensionReader {
 						if (csq.tn == 98) gb.DrawLine(Pens.Yellow, x1, y1, x2, y1);
 						if (csq.ts == 98) gb.DrawLine(Pens.Yellow, x1, y2, x2, y2);
 						//Pits?
-						if (csq.tf == 106)
-						{
+						if (csq.tf == 106) {
 							gb.DrawLine(Pens.White, x1, y1, x2, y2);
 							gb.DrawLine(Pens.White, x1, y2, x2, y1);
 						}
@@ -520,7 +559,7 @@ namespace DemiseAscensionReader {
 				mons[mon].type = ReadShort();
 				mons[mon].uk3 = HexStr(ReadBytes(10));
 				mons[mon].uk4 = HexStr(ReadBytes(26));
-				mons[mon].size = ReadByte();
+				mons[mon].size = ReadByte(); 
 				mons[mon].uk5 = HexStr(ReadBytes(73));
 			}
 			//if(moninfo is null) moninfo = new Info[maxinfo];
