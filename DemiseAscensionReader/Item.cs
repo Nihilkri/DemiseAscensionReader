@@ -42,6 +42,7 @@ namespace DemiseAscensionReader {
 		public int charges;
 
 		public int guilds;
+		public string gs;
 		public short uselvl;
 		public float dmg;
 		public short suk3;
@@ -65,7 +66,12 @@ namespace DemiseAscensionReader {
 		public short codexspellindex;
 		public string codexspellname;
 
-		public byte[] buk4;
+		public int sp2;
+		public short unique;
+		public short suk4;
+		public short sp3;
+		public byte[] buk;
+		public short sp4;
 
 
 	}

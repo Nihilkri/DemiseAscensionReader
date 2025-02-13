@@ -19,7 +19,7 @@ namespace DemiseAscensionReader {
 		Graphics gf, gb; Bitmap gi;
 		//int fx = 1536, fy = 1024, fx2 = 768, fy2 = 512;
 		int fx = 1920, fy = 1080, fx2 = 960, fy2 = 540;
-		bool nomouse = true;
+		bool nomouse = false;
 		Brush[] br = new Brush[] {
 			Brushes.Black, Brushes.Blue, Brushes.Green, Brushes.Teal,
 			Brushes.Red, Brushes.Purple, Brushes.Brown, Brushes.DarkGray,
@@ -116,6 +116,7 @@ namespace DemiseAscensionReader {
 								case Keys.Down: ShowItems(++lv, page); break;
 								case Keys.Left: ShowItems(lv, --page); break;
 								case Keys.Right: ShowItems(lv, ++page); break;
+								case Keys.E: CsVItems(); break;
 								case Keys.Oemtilde:
 									if(Item.sorted != "num") {
 										items = items.OrderBy(x => x.num).ToArray();
@@ -135,6 +136,11 @@ namespace DemiseAscensionReader {
 									if(Item.sorted != "CR") {
 										items = items.OrderBy(x => x.CR).ToArray();
 										Item.sorted = "CR";
+									} ShowItems(lv, page); break;
+								case Keys.D4:
+									if(Item.sorted != "suk4") {
+										items = items.OrderBy(x => x.suk4).ToArray();
+										Item.sorted = "suk4";
 									} ShowItems(lv, page); break;
 							}
 							break;
@@ -883,7 +889,18 @@ namespace DemiseAscensionReader {
 				if(items[item].infoindex > maxinfo)
 					maxinfo = items[item].infoindex;
 				items[item].codexspellindex = ReadShort();
-				items[item].buk4 = ReadBytes(44);
+
+				items[item].sp2 = ReadInt();
+				items[item].unique = ReadShort();
+				items[item].suk4 = ReadShort();
+				items[item].sp3 = ReadShort();
+				items[item].buk = ReadBytes(32);
+				items[item].sp4 = ReadShort();
+
+				items[item].gs = "";
+				for(int i = 0; i < Item.guildnames.Length; i++) {
+					items[item].gs += (((items[item].guilds & (1 << i)) != 0) ? Item.guildnames[i] : "   ") + " ";
+				}
 
 				if(items[item].codexspellindex == 0) {
 					items[item].codexspellname = "";
@@ -911,7 +928,8 @@ namespace DemiseAscensionReader {
 			lv = (nv + Item.numitems) % Item.numitems;
 			page = (np + 4) % 4;
 			gb.Clear(Color.Black); Item item; int num; String fmt = "", s = "";
-			s = "Sorted by " + Item.sorted + ". To sort press `. num, 1. itemid, 2. uselvl, 3. CR\n";
+			s = "Sorted by " + Item.sorted + ". To sort press `. num, " +
+				"1. itemid, 2. uselvl, 3. CR, 4. suk4\n";
 			switch(page) {
 				case 0:
 					fmt = "{0,3} {1,30} {2,3} {3,3} {4,4}/{5,4} " +
@@ -928,7 +946,7 @@ namespace DemiseAscensionReader {
 				case 1:
 					fmt = "{0,3} {1,30} " +
 						"{2,8} {3,7} {4,21} " +
-						"{5,7} {6,48} {7,6} {8,8} {9,4}" +
+						"{5,7} {6,48} {7,6} {8,8} {9,4} " +
 						"{10,3} {11,5} {12,13} " +
 						"{13,3} {14,3} {15,3} {16,3} {17,3} {18,3} " +
 						"{19,3} {20,3} {21,3} {22,3} {23,3} {24,3} " +
@@ -965,8 +983,12 @@ namespace DemiseAscensionReader {
 						"Quest");
 					break;
 				case 3:
-					fmt = "{0,3} {1,30} {2,4} {3,21} {4,88}\n";
-					s += String.Format(fmt, "  #", "Name", "Info", "Codex Spell", "Unknown4");
+					fmt = "{0,3} {1,30} {2,4} {3,21} " +
+						"{4,3} {5,6} {6,4} {7,3} " +
+						"{8,64} {9,3}\n";
+					s += String.Format(fmt, "  #", "Name", "Info", "Codex Spell",
+						"sp2", "Unique", "suk4", "sp3",
+						"Unknown4", "sp4");
 					break;
 
 				default:
@@ -987,17 +1009,13 @@ namespace DemiseAscensionReader {
 							item.swings, item.suk2);
 						break;
 					case 1:
-						string gs = "";
-						for(int i = 0; i < 12; i++) {
-							gs += (((item.guilds & (1 << i)) != 0) ? Item.guildnames[i] : "   ") + " ";
-						}
 						s = String.Format(fmt,
 							num, item.name, 
 							item.spellnum, item.spellID,
 							(item.spellID == -1 ? "" :
 								((spells is null) ? "No Spells Loaded" :
 									spells[item.spellnum].name)), 
-							item.charges, gs, item.uselvl, item.dmg, item.suk3,
+							item.charges, item.gs, item.uselvl, item.dmg, item.suk3,
 							item.sp1, item.hands, Item.types[item.type],
 							item.res[0], item.res[1], item.res[2], item.res[3], item.res[4], item.res[5],
 							item.res[6], item.res[7], item.res[8], item.res[9], item.res[10], item.res[11]
@@ -1039,7 +1057,9 @@ namespace DemiseAscensionReader {
 						break;
 					case 3:
 						s = String.Format(fmt,
-							num, item.name, item.infoindex, item.codexspellname, HexStr(item.buk4));
+							num, item.name, item.infoindex, item.codexspellname, 
+							item.sp2, item.unique, item.suk4, item.sp3,
+							HexStr(item.buk), item.sp4);
 						break;
 					default:
 						break;
@@ -1050,53 +1070,93 @@ namespace DemiseAscensionReader {
 
 		}
 		public void CsVItems() {
-			return;
 			string csvfyl = dir + mode + ".csv";
 			using(StreamWriter writer = new StreamWriter(csvfyl))
 			using(CsvWriter csv = new CsvWriter(writer,
 				System.Globalization.CultureInfo.InvariantCulture)) {
 				Object[] fields;
 				String[] header = {
-					"Num", "Name", "Att", "Def", "MonID", "HP",
-						"Str", "Int", "Wis", "Con", "Cha", "Dex", "   ", "Type",
-						"Lvl", "Ukb", "Unknown",
+					"Name", "Num", "ID", "Att", "Def",
+						"Value", "Lvl", "suk1",
+						"Levi", "Invs", "Prot", "SeeI", "Crit", "Stab", "Burn", "Frez",
+						"Pois", "    ", "Elec", "Ston", "Dcap", "HPrg", "SPrg", "Spel", "    ",
+						"Swng", "suk2",
+					"SpellNum", "SpellID", "SpellName",
+						"Charges", "Guilds", "Uselvl", "Dmg", "suk3",
+						"sp1", "Hands", "Type",
 						"Fir", "Col", "Ele", "Min", "Dis", "Poi",
 						"Mag", "Sto", "Par", "Dra", "Aci", "Age",
-					" SeeInv", "  Invis", " MagRes", "ChrmRes", "WeapRes",
-						"ComplWR", " Unused", " Poison", "Disease", "Paralyz",
-						"BrthFir", "BrthCol", "SpitAcd", "Electro", "  Drain",
-						"Stone", "    Age", "CritHit", "BckStab", "DstrItm",
-						"  Steal", " Behead", "Unused",
-					"   Fire", "   Cold", " Electr", "   Mind", " Damage",
-						"Element", "   Kill", "  Charm", "   Bind", "   Heal",
-						"Movemnt", " Banish", " Dispel", " Resist", " Visual",
-						"Magical", "Locaton", "Protect", "MDamage", " MDeath",
-						"MAlchem", "  MHeal", "  MMove", "Unobtan",
-						"Unknown2", "Unknown3", "Unknown4" };
+					"ReqStr", "ModStr", "ReqInt", "ModInt",
+						"ReqWis", "ModWis", "ReqCon", "ModCon",
+						"ReqCha", "ModCha", "ReqDex", "ModDex",
+						"Req-", "Mod-",
+						"Cursed", "SL", " CR", "DmgMult: Hum",
+						"Sli", "Dem", "Dev", "Ele", "Rep",
+						"Dra", "Ani", "Ins", "Und", "Wat",
+						"Gia", "Myt", "Lyc", "Thi", "Mag",
+						"War", "Ind", "f18", "f19", "f20",
+						"Quest", 
+					"Info", "Codex Spell",
+						"sp2", "Unique", "suk4", "sp3",
+						"Unknown4", "sp4"
+				};
 				foreach(String headerItem in header) csv.WriteField(headerItem); csv.NextRecord();
-				for(int num = 0; num < Monster.nummon; num++) {
-					Monster mon = mons[num];
+				for(int num = 0; num < Item.numitems; num++) {
+					Item item = items[num];
 					fields = new object[] {
-						num, mon.name, mon.att, mon.def, mon.monid, mon.hp,
-						mon.stats[0], mon.stats[1], mon.stats[2], mon.stats[3], mon.stats[4], mon.stats[5],
-						mon.stats[6], Monster.types[mon.type], mon.findlvl, mon.ukb, mon.uk1,
-						mon.res[0], mon.res[1], mon.res[2], mon.res[3], mon.res[4], mon.res[5], mon.res[6],
-						mon.res[7], mon.res[8], mon.res[9], mon.res[10], mon.res[11],
-						mon.abil[0], mon.abil[1], mon.abil[2], mon.abil[3], mon.abil[4],
-						mon.abil[5], mon.abil[6], mon.abil[7], mon.abil[8], mon.abil[9],
-						mon.abil[10], mon.abil[11], mon.abil[12], mon.abil[13], mon.abil[14],
-						mon.abil[15], mon.abil[16], mon.abil[17], mon.abil[18], mon.abil[19],
-						mon.abil[20], mon.abil[21], mon.abil[22],
-						mon.spells[0], mon.spells[1], mon.spells[2], mon.spells[3], mon.spells[4],
-						mon.spells[5], mon.spells[6], mon.spells[7], mon.spells[8], mon.spells[9],
-						mon.spells[10], mon.spells[11], mon.spells[12], mon.spells[13], mon.spells[14],
-						mon.spells[15], mon.spells[16], mon.spells[17], mon.spells[18], mon.spells[19],
-						mon.spells[20], mon.spells[21], mon.spells[22], mon.spells[23],
-						mon.uk2, mon.uk3, mon.uk4 };
+						item.name, item.num, item.itemid, item.att, item.def, item.val, item.findlvl,
+							item.suk1,
+							item.abil[00], item.abil[01], item.abil[02], item.abil[03],
+							item.abil[04], item.abil[05], item.abil[06], item.abil[07],
+							item.abil[08], item.abil[09], item.abil[10], item.abil[11],
+							item.abil[12], item.abil[13], item.abil[14], item.abil[15], item.abil[16],
+							item.swings, item.suk2,
+						item.spellnum, item.spellID,
+							(item.spellID == -1 ? "" :
+								((spells is null) ? "No Spells Loaded" :
+									spells[item.spellnum].name)),
+							item.charges, item.gs, item.uselvl, item.dmg, item.suk3,
+							item.sp1, item.hands, Item.types[item.type],
+							item.res[0], item.res[1], item.res[2], item.res[3], item.res[4], item.res[5],
+							item.res[6], item.res[7], item.res[8], item.res[9], item.res[10], item.res[11],
+						item.req[0], item.mod[0],
+							item.req[1], item.mod[1],
+							item.req[2], item.mod[2],
+							item.req[3], item.mod[3],
+							item.req[4], item.mod[4],
+							item.req[5], item.mod[5],
+							item.req[6], item.mod[6],
+							item.cursed, item.SL, item.CR == 0 ? "NCR" : " CR",
+							item.dmgmult[00] == 1.0 ? "_" : "" + item.dmgmult[00],
+							item.dmgmult[01] == 1.0 ? "_" : "" + item.dmgmult[01],
+							item.dmgmult[02] == 1.0 ? "_" : "" + item.dmgmult[02],
+							item.dmgmult[03] == 1.0 ? "_" : "" + item.dmgmult[03],
+							item.dmgmult[04] == 1.0 ? "_" : "" + item.dmgmult[04],
+							item.dmgmult[05] == 1.0 ? "_" : "" + item.dmgmult[05],
+							item.dmgmult[06] == 1.0 ? "_" : "" + item.dmgmult[06],
+							item.dmgmult[07] == 1.0 ? "_" : "" + item.dmgmult[07],
+							item.dmgmult[08] == 1.0 ? "_" : "" + item.dmgmult[08],
+							item.dmgmult[09] == 1.0 ? "_" : "" + item.dmgmult[09],
+							item.dmgmult[10] == 1.0 ? "_" : "" + item.dmgmult[10],
+							item.dmgmult[11] == 1.0 ? "_" : "" + item.dmgmult[11],
+							item.dmgmult[12] == 1.0 ? "_" : "" + item.dmgmult[12],
+							item.dmgmult[13] == 1.0 ? "_" : "" + item.dmgmult[13],
+							item.dmgmult[14] == 1.0 ? "_" : "" + item.dmgmult[14],
+							item.dmgmult[15] == 1.0 ? "_" : "" + item.dmgmult[15],
+							item.dmgmult[16] == 1.0 ? "_" : "" + item.dmgmult[16],
+							item.dmgmult[17] == 1.0 ? "_" : "" + item.dmgmult[17],
+							item.dmgmult[18] == 1.0 ? "_" : "" + item.dmgmult[18],
+							item.dmgmult[19] == 1.0 ? "_" : "" + item.dmgmult[19],
+							item.dmgmult[20] == 1.0 ? "_" : "" + item.dmgmult[20],
+							item.questitem,
+						item.infoindex, item.codexspellname,
+							item.sp2, item.unique, item.suk4, item.sp3,
+							HexStr(item.buk), item.sp4
+					};
 					foreach(Object fieldItem in fields) csv.WriteField(fieldItem); csv.NextRecord();
 				}
 			};
-			MessageBox.Show("Monsters exported to " + csvfyl);
+			MessageBox.Show("Items exported to " + csvfyl);
 		}
 		#endregion Items
 		#region Spells
