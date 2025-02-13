@@ -30,7 +30,7 @@ namespace DemiseAscensionReader {
 		public string name;
 		public short itemid;
 		public short att, def;
-		public int buk1;
+		public int val;
 		public short findlvl;
 		public short suk1;
 		public float[] abil;
@@ -62,7 +62,8 @@ namespace DemiseAscensionReader {
 
 		public short infoindex;
 
-		public short codexspell;
+		public short codexspellindex;
+		public string codexspellname;
 
 		public byte[] buk4;
 

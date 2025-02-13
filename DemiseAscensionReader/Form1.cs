@@ -181,7 +181,7 @@ namespace DemiseAscensionReader {
 					}
 							gf.DrawString(
 						//"Types: " + cgp.type.ToString("X8") +
-						"Types: " + abandc(BitList(cgp.type, Monster.types)) +
+						"Types 1: " + Abandc(BitList(cgp.type, Monster.types), true, 9, "\nTypes 2: ") +
 						"\nGID: " + cgp.id +
 						"\nLF: " + cgp.lf +
 						"\nLM: " + laired +
@@ -335,7 +335,8 @@ namespace DemiseAscensionReader {
 			return col.ToArray();
 		}
 
-		public string abandc(string[] a) {
+		public string Abandc(string[] a, bool noand = false,
+			int newlinelen = 100, string newline = "\n") {
 			string s = "";
 			switch(a.Length) {
 				case 0:
@@ -343,11 +344,12 @@ namespace DemiseAscensionReader {
 				case 1:
 					s = a[0]; break;
 				case 2:
-					s = a[0] + " and " + a[1]; break;
+					s = a[0] + (noand ? ", " : " and ") + a[1]; break;
 				default:
 					for (int i = 0; i < a.Length - 1; i++) {
 						s += a[i] + ", ";
-					} s += "and " + a[a.Length - 1];
+						if((i + 1) % newlinelen == 0) s += newline;
+					} s += (noand ? "" : "and ") + a[a.Length - 1];
 					break;
 			}
 			return s;
@@ -543,7 +545,7 @@ namespace DemiseAscensionReader {
 				mons[mon].def = ReadShort();
 				mons[mon].monid = ReadShort();
 				mons[mon].hp = ReadShort();
-				mons[mon].uk = HexStr(ReadBytes(6));
+				mons[mon].uk1 = HexStr(ReadBytes(6));
 				mons[mon].findlvl = ReadByte();
 				mons[mon].ukb = ReadByte();
 				mons[mon].res = new short[12];
@@ -558,9 +560,32 @@ namespace DemiseAscensionReader {
 				for(int i = 0; i < 7; i++) mons[mon].stats[i] = ReadShort();
 				mons[mon].type = ReadShort();
 				mons[mon].uk3 = HexStr(ReadBytes(10));
-				mons[mon].uk4 = HexStr(ReadBytes(26));
-				mons[mon].size = ReadByte(); 
-				mons[mon].uk5 = HexStr(ReadBytes(73));
+
+				mons[mon].uks1 = ReadShort();
+				mons[mon].breath = ReadShort();
+				mons[mon].uk4 = HexStr(ReadBytes(22));
+				mons[mon].size = ReadByte();
+				mons[mon].uk5 = HexStr(ReadBytes(5));
+				mons[mon].weapweakindex = ReadShort();
+				mons[mon].uks2 = ReadShort();
+				mons[mon].infoindex = ReadShort();
+				mons[mon].uk6 = HexStr(ReadBytes(62));
+
+				if(mons[mon].weapweakindex == -1) {
+					mons[mon].weapweakname = "";
+				} else {
+					if(items is null) {
+						mons[mon].weapweakname = "No Items Loaded";
+					} else {
+						mons[mon].weapweakname = "Item not found!";
+						for(int i = 0; i < items.Length; i++) {
+							if(items[i].itemid == mons[mon].weapweakindex) {
+								mons[mon].weapweakname = items[i].name; break;
+							}
+						}
+					}
+				}
+
 			}
 			//if(moninfo is null) moninfo = new Info[maxinfo];
 			Monster.sorted = "num";
@@ -576,13 +601,13 @@ namespace DemiseAscensionReader {
 			switch(page) {
 				case 0:
 					fmt = "{0,3} {1,24} {2,4}/{3,4} {4,5} {5,5} " +
-						"{6,3} {7,3} {8,3} {9,3} {10,3} {11,3} {12,3} {13,11} {14,3} {15,3}  " +
-						"{16,16} " +
+						"{6,3} {7,3} {8,3} {9,3} {10,3} {11,3} {12,3} {13,11} {14,3} " +
+						"{15,3} {16,16} " +
 						"{17,3} {18,3} {19,3} {20,3} {21,3} {22,3} " + 
 						"{23,3} {24,3} {25,3} {26,3} {27,3} {28,3}\n";
 					s = String.Format(fmt, "Num", "Name", "Att", "Def", "MonID", "HP", 
-						"Str", "Int", "Wis", "Con", "Cha", "Dex", "   ", "Type", "Lvl", "Ukb",
-						"Unknown",
+						"Str", "Int", "Wis", "Con", "Cha", "Dex", "   ", "Type", "Lvl",
+						"Ukb", "Unknown1",
 						"Fir", "Col", "Ele", "Min", "Dis", "Poi",
 						"Mag", "Sto", "Par", "Dra", "Aci", "Age");
 					break;
@@ -611,12 +636,14 @@ namespace DemiseAscensionReader {
 						"MAlchem", "  MHeal", "  MMove", "Unobtan");
 					break;
 				case 3:
-					fmt = "{0,3} {1,24} {2,5} {3,4} {4,44} {5,28}\n";
-					s = String.Format(fmt, "Num", "Name", "Sizef", "Size", "Unknown2", "Unknown3");
+					fmt = "{0,3} {1,24} {2,5} {3,44} {4,20} " +
+						"{5,4} {6,6} {7,44} {8,4} {9,10} {10,30} {11,4}\n";
+					s = String.Format(fmt, "Num", "Name", "Sizef", "Unknown2", "Unknown3",
+						"uks1", "Breath", "Unknown4", "Size", "Unknown5", "WeapWeak", "uks2");
 					break;
 				case 4:
-					fmt = "{0,3} {1,24} {2,52} {3,146}\n";
-					s = String.Format(fmt, "Num", "Name", "Unknown4", "Unknown5");
+					fmt = "{0,3} {1,24} {2,4} {3,124}\n";
+					s = String.Format(fmt, "Num", "Name", "Info", "Unknown6");
 					break;
 				default:
 					fmt = ""; s = "";
@@ -642,7 +669,8 @@ namespace DemiseAscensionReader {
 						s = String.Format(fmt,
 							num, mon.name, mon.att, mon.def, mon.monid, mon.hp,
 							mon.stats[0], mon.stats[1], mon.stats[2], mon.stats[3], mon.stats[4], mon.stats[5],
-							mon.stats[6], Monster.types[mon.type], mon.findlvl, mon.ukb, mon.uk,
+							mon.stats[6], Monster.types[mon.type], mon.findlvl,
+							mon.ukb, mon.uk1,
 							mon.res[0], mon.res[1], mon.res[2], mon.res[3], mon.res[4], mon.res[5], mon.res[6],
 							mon.res[7], mon.res[8], mon.res[9], mon.res[10], mon.res[11]);
 						break;
@@ -666,11 +694,12 @@ namespace DemiseAscensionReader {
 						break;
 					case 3:
 						s = String.Format(fmt,
-							num, mon.name, mon.sizef, mon.size, mon.uk2, mon.uk3);
+							num, mon.name, mon.sizef, mon.uk2, mon.uk3,
+							mon.uks1, mon.breath, mon.uk4, mon.size, mon.uk5, mon.weapweakname, mon.uks2);
 						break;
 					case 4:
 						s = String.Format(fmt,
-							num, mon.name, mon.uk4, mon.uk5);
+							num, mon.name, mon.infoindex, mon.uk6);
 						break;
 					default:
 						break;
@@ -710,7 +739,7 @@ namespace DemiseAscensionReader {
 					fields = new object[] {
 						num, mon.name, mon.att, mon.def, mon.monid, mon.hp,
 						mon.stats[0], mon.stats[1], mon.stats[2], mon.stats[3], mon.stats[4], mon.stats[5],
-						mon.stats[6], Monster.types[mon.type], mon.findlvl, mon.ukb, mon.uk,
+						mon.stats[6], Monster.types[mon.type], mon.findlvl, mon.ukb, mon.uk1,
 						mon.res[0], mon.res[1], mon.res[2], mon.res[3], mon.res[4], mon.res[5], mon.res[6],
 						mon.res[7], mon.res[8], mon.res[9], mon.res[10], mon.res[11],
 						mon.abil[0], mon.abil[1], mon.abil[2], mon.abil[3], mon.abil[4],
@@ -750,7 +779,7 @@ namespace DemiseAscensionReader {
 				items[item].itemid = ReadShort();
 				items[item].att = ReadShort();
 				items[item].def = ReadShort();
-				items[item].buk1 = ReadInt();
+				items[item].val = ReadInt();
 				items[item].findlvl = ReadShort();
 				items[item].suk1 = ReadShort();
 				items[item].abil = new float[17];
@@ -791,12 +820,28 @@ namespace DemiseAscensionReader {
 				items[item].infoindex = ReadShort();
 				if(items[item].infoindex > maxinfo)
 					maxinfo = items[item].infoindex;
-				items[item].codexspell = ReadShort();
+				items[item].codexspellindex = ReadShort();
 				items[item].buk4 = ReadBytes(44);
+
+				if(items[item].codexspellindex == 0) {
+					items[item].codexspellname = "";
+				} else {
+					if(spells is null) {
+						items[item].codexspellname = "No Spells Loaded";
+					} else {
+						items[item].codexspellname = "Spell not found!";
+						for(int i = 0; i < spells.Length; i++) {
+							if(spells[i].spellid == items[item].codexspellindex) {
+								items[item].codexspellname = spells[i].name; break;
+							}
+						}
+					}
+				}
+
 			}
 			if(iteminfo is null) iteminfo = new Info[maxinfo];
-			Item.sorted = "num";
-			//items = items.OrderBy(x => x.dmg).ToArray();
+			Item.sorted = "uselvl";
+			items = items.OrderBy(x => x.uselvl).ToArray();
 			MessageBox.Show("Items loaded! Printing the items!");
 			ShowItems(0, 0); nomouse = false;
 
@@ -804,7 +849,7 @@ namespace DemiseAscensionReader {
 		public void ShowItems(int nv, int np) {
 			lv = (nv + Item.numitems) % Item.numitems;
 			page = (np + 4) % 4;
-			gb.Clear(Color.Black); Item item; int num; String fmt = "", s = "", codexspellname = "";
+			gb.Clear(Color.Black); Item item; int num; String fmt = "", s = "";
 			switch(page) {
 				case 0:
 					fmt = "{0,3} {1,30} {2,3} {3,3} {4,4}/{5,4} " +
@@ -865,12 +910,13 @@ namespace DemiseAscensionReader {
 				default:
 					break;
 			}
-			for(int q = lv; q < lv + 75; q++) {
-				num = q % Item.numitems; item = items[num];
+			gb.DrawString(s, Font, Brushes.White, 0, 0);
+			for(int q = 0; q < 75; q++) {
+				num = (lv + q) % Item.numitems; item = items[num];
 				switch(page) {
 					case 0:
-						s += String.Format(fmt,
-							num, item.name, item.num, item.itemid, item.att, item.def, item.buk1, item.findlvl, 
+						s = String.Format(fmt,
+							num, item.name, item.num, item.itemid, item.att, item.def, item.val, item.findlvl, 
 							item.suk1,
 							item.abil[00], item.abil[01], item.abil[02], item.abil[03],
 							item.abil[04], item.abil[05], item.abil[06], item.abil[07],
@@ -883,7 +929,7 @@ namespace DemiseAscensionReader {
 						for(int i = 0; i < 12; i++) {
 							gs += (((item.guilds & (1 << i)) != 0) ? Item.guildnames[i] : "   ") + " ";
 						}
-						s += String.Format(fmt,
+						s = String.Format(fmt,
 							num, item.name, 
 							item.spellnum, item.spellID,
 							(item.spellID == -1 ? "" :
@@ -896,7 +942,7 @@ namespace DemiseAscensionReader {
 							);
 						break;
 					case 2:
-						s += String.Format(fmt,
+						s = String.Format(fmt,
 							num, item.name,
 							item.req[0], (item.mod[0] == 0 ? "  " : (item.mod[0] > 0 ? "+" : "") + item.mod[0]),
 							item.req[1], (item.mod[1] == 0 ? "  " : (item.mod[1] > 0 ? "+" : "") + item.mod[1]),
@@ -930,31 +976,65 @@ namespace DemiseAscensionReader {
 							item.questitem);
 						break;
 					case 3:
-						if(item.codexspell == 0) {
-							codexspellname = "";
-						} else {
-							if(spells is null) {
-								codexspellname = "No Spells Loaded";
-							} else {
-								codexspellname = "Spell not found!";
-								for(int i = 0; i < spells.Length; i++) {
-									if(spells[i].spellid == item.codexspell) {
-										codexspellname = spells[i].name; break;
-									}
-								}
-							}
-						}
-						s += String.Format(fmt,
-							num, item.name, item.infoindex, codexspellname, HexStr(item.buk4));
+						s = String.Format(fmt,
+							num, item.name, item.infoindex, item.codexspellname, HexStr(item.buk4));
 						break;
 					default:
 						break;
 				}
-
+				gb.DrawString(s, Font, q % 2 == 0 ? Brushes.White : Brushes.Gray, 0, q * 13 + 13);
 			}
-			gb.DrawString(s, Font, Brushes.White, 0, 0);
 			gf.DrawImage(gi, 0, 0);
 
+		}
+		public void CsVItems() {
+			return;
+			string csvfyl = dir + mode + ".csv";
+			using(StreamWriter writer = new StreamWriter(csvfyl))
+			using(CsvWriter csv = new CsvWriter(writer,
+				System.Globalization.CultureInfo.InvariantCulture)) {
+				Object[] fields;
+				String[] header = {
+					"Num", "Name", "Att", "Def", "MonID", "HP",
+						"Str", "Int", "Wis", "Con", "Cha", "Dex", "   ", "Type",
+						"Lvl", "Ukb", "Unknown",
+						"Fir", "Col", "Ele", "Min", "Dis", "Poi",
+						"Mag", "Sto", "Par", "Dra", "Aci", "Age",
+					" SeeInv", "  Invis", " MagRes", "ChrmRes", "WeapRes",
+						"ComplWR", " Unused", " Poison", "Disease", "Paralyz",
+						"BrthFir", "BrthCol", "SpitAcd", "Electro", "  Drain",
+						"Stone", "    Age", "CritHit", "BckStab", "DstrItm",
+						"  Steal", " Behead", "Unused",
+					"   Fire", "   Cold", " Electr", "   Mind", " Damage",
+						"Element", "   Kill", "  Charm", "   Bind", "   Heal",
+						"Movemnt", " Banish", " Dispel", " Resist", " Visual",
+						"Magical", "Locaton", "Protect", "MDamage", " MDeath",
+						"MAlchem", "  MHeal", "  MMove", "Unobtan",
+						"Unknown2", "Unknown3", "Unknown4" };
+				foreach(String headerItem in header) csv.WriteField(headerItem); csv.NextRecord();
+				for(int num = 0; num < Monster.nummon; num++) {
+					Monster mon = mons[num];
+					fields = new object[] {
+						num, mon.name, mon.att, mon.def, mon.monid, mon.hp,
+						mon.stats[0], mon.stats[1], mon.stats[2], mon.stats[3], mon.stats[4], mon.stats[5],
+						mon.stats[6], Monster.types[mon.type], mon.findlvl, mon.ukb, mon.uk1,
+						mon.res[0], mon.res[1], mon.res[2], mon.res[3], mon.res[4], mon.res[5], mon.res[6],
+						mon.res[7], mon.res[8], mon.res[9], mon.res[10], mon.res[11],
+						mon.abil[0], mon.abil[1], mon.abil[2], mon.abil[3], mon.abil[4],
+						mon.abil[5], mon.abil[6], mon.abil[7], mon.abil[8], mon.abil[9],
+						mon.abil[10], mon.abil[11], mon.abil[12], mon.abil[13], mon.abil[14],
+						mon.abil[15], mon.abil[16], mon.abil[17], mon.abil[18], mon.abil[19],
+						mon.abil[20], mon.abil[21], mon.abil[22],
+						mon.spells[0], mon.spells[1], mon.spells[2], mon.spells[3], mon.spells[4],
+						mon.spells[5], mon.spells[6], mon.spells[7], mon.spells[8], mon.spells[9],
+						mon.spells[10], mon.spells[11], mon.spells[12], mon.spells[13], mon.spells[14],
+						mon.spells[15], mon.spells[16], mon.spells[17], mon.spells[18], mon.spells[19],
+						mon.spells[20], mon.spells[21], mon.spells[22], mon.spells[23],
+						mon.uk2, mon.uk3, mon.uk4 };
+					foreach(Object fieldItem in fields) csv.WriteField(fieldItem); csv.NextRecord();
+				}
+			};
+			MessageBox.Show("Monsters exported to " + csvfyl);
 		}
 		#endregion Items
 		#region Spells

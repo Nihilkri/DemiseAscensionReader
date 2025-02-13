@@ -23,7 +23,7 @@ namespace DemiseAscensionReader {
 		public short att, def;
 		public short monid;
 		public short hp;
-		public string uk;
+		public string uk1;
 		public byte findlvl;
 		public byte ukb;
 		public short[] res;
@@ -34,8 +34,16 @@ namespace DemiseAscensionReader {
 		public short[] stats;
 		public short type;
 		public string uk3;
+
+		public short uks1;
+		public short breath;
 		public string uk4;
 		public byte size;
 		public string uk5;
+		public short weapweakindex;
+		public string weapweakname;
+		public short uks2;
+		public short infoindex;
+		public string uk6;
 	}
 }
