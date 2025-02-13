@@ -33,6 +33,7 @@ namespace DemiseAscensionReader {
 		public string uk2;
 		public short[] stats;
 		public short type;
+		public short swings;
 		public string uk3;
 
 		public short uks1;

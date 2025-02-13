@@ -104,6 +104,11 @@ namespace DemiseAscensionReader {
 										mons = mons.OrderBy(x => x.findlvl).ToArray();
 										Monster.sorted = "findlvl";
 									} ShowMonsters(lv, page); break;
+								case Keys.D3:
+									if(Monster.sorted != "swings") {
+										mons = mons.OrderBy(x => x.swings).ToArray();
+										Monster.sorted = "swings";
+									} ShowMonsters(lv, page); break;
 							}
 							break;
 						case "DEMISEItems":
@@ -625,7 +630,8 @@ namespace DemiseAscensionReader {
 				mons[mon].stats = new short[7];
 				for(int i = 0; i < 7; i++) mons[mon].stats[i] = ReadShort();
 				mons[mon].type = ReadShort();
-				mons[mon].uk3 = HexStr(ReadBytes(10));
+				mons[mon].swings = ReadShort();
+				mons[mon].uk3 = HexStr(ReadBytes(8));
 
 				mons[mon].uks1 = ReadShort();
 				mons[mon].breath = ReadShort();
@@ -665,7 +671,8 @@ namespace DemiseAscensionReader {
 			lv = (nv + Monster.nummon) % Monster.nummon;
 			page = (np + 5) % 5;
 			gb.Clear(Color.Black); Monster mon; int num; String fmt = "", s = "";
-			s = "Sorted by " + Monster.sorted + ". To sort press `. num, 1. monid, 2. findlvl\n";
+			s = "Sorted by " + Monster.sorted + ". To sort press " +
+				"`. num, 1. monid, 2. findlvl, 3. swings\n";
 			switch(page) {
 				case 0:
 					fmt = "{0,3} {1,24} {2,4}/{3,4} {4,5} {5,5} " +
@@ -704,9 +711,9 @@ namespace DemiseAscensionReader {
 						"MAlchem", "  MHeal", "  MMove", "Unobtan");
 					break;
 				case 3:
-					fmt = "{0,3} {1,24} {2,5} {3,44} {4,20} " +
-						"{5,4} {6,6} {7,44} {8,4} {9,10} {10,30} {11,4}\n";
-					s += String.Format(fmt, "Num", "Name", "Sizef", "Unknown2", "Unknown3",
+					fmt = "{0,3} {1,24} {2,5} {3,44} {4,6} {5,16} " +
+						"{6,4} {7,6} {8,44} {9,4} {10,10} {11,30} {12,4}\n";
+					s += String.Format(fmt, "Num", "Name", "Sizef", "Unknown2", "Swings", "Unknown3",
 						"uks1", "Breath", "Unknown4", "Size", "Unknown5", "WeapWeak", "uks2");
 					break;
 				case 4:
@@ -762,7 +769,7 @@ namespace DemiseAscensionReader {
 						break;
 					case 3:
 						s = String.Format(fmt,
-							num, mon.name, mon.sizef, mon.uk2, mon.uk3,
+							num, mon.name, mon.sizef, mon.uk2, mon.swings, mon.uk3,
 							mon.uks1, mon.breath, mon.uk4, mon.size, mon.uk5, mon.weapweakname, mon.uks2);
 						break;
 					case 4:
@@ -773,7 +780,7 @@ namespace DemiseAscensionReader {
 						break;
 				}
 
-				gb.DrawString(s, Font, q%2==0 ? Brushes.White : Brushes.Gray, 0, q*13+26);
+				gb.DrawString(s, Font, num%2==0 ? Brushes.White : Brushes.Gray, 0, q*13+26);
 			}
 			gf.DrawImage(gi, 0, 0);
 
@@ -1064,7 +1071,7 @@ namespace DemiseAscensionReader {
 					default:
 						break;
 				}
-				gb.DrawString(s, Font, q % 2 == 0 ? Brushes.White : Brushes.Gray, 0, q * 13 + 26);
+				gb.DrawString(s, Font, num % 2 == 0 ? Brushes.White : Brushes.Gray, 0, q * 13 + 26);
 			}
 			gf.DrawImage(gi, 0, 0);
 
@@ -1322,7 +1329,7 @@ namespace DemiseAscensionReader {
 						break;
 				}
 
-				gb.DrawString(s, Font, q % 2 == 0 ? Brushes.White : Brushes.Gray, 0, q * 13 + 26);
+				gb.DrawString(s, Font, num % 2 == 0 ? Brushes.White : Brushes.Gray, 0, q * 13 + 26);
 			}
 			gf.DrawImage(gi, 0, 0);
 
