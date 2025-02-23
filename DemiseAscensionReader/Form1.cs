@@ -807,7 +807,9 @@ namespace DemiseAscensionReader {
 						"Movemnt", " Banish", " Dispel", " Resist", " Visual",
 						"Magical", "Locaton", "Protect", "MDamage", " MDeath",
 						"MAlchem", "  MHeal", "  MMove", "Unobtan",
-						"Unknown2", "Unknown3", "Unknown4" };
+					"Sizef", "Unknown2", "Swings", "Unknown3",
+						"uks1", "Breath", "Unknown4", "Size", "Unknown5",
+					  "WeapWeak", "uks2", "Info", "Unknown6" };
 				foreach (String headerItem in header) csv.WriteField(headerItem); csv.NextRecord();
 				for(int num = 0; num < Monster.nummon; num++) {
 					Monster mon = mons[num];
@@ -827,7 +829,9 @@ namespace DemiseAscensionReader {
 						mon.spells[10], mon.spells[11], mon.spells[12], mon.spells[13], mon.spells[14],
 						mon.spells[15], mon.spells[16], mon.spells[17], mon.spells[18], mon.spells[19],
 						mon.spells[20], mon.spells[21], mon.spells[22], mon.spells[23],
-						mon.uk2, mon.uk3, mon.uk4 };
+						mon.sizef, mon.uk2, mon.swings, mon.uk3,
+						mon.uks1, mon.breath, mon.uk4, mon.size, mon.uk5, 
+						mon.weapweakname, mon.uks2, mon.infoindex, mon.uk6 };
 					foreach(Object fieldItem in fields) csv.WriteField(fieldItem); csv.NextRecord();
 				}
 			};
